@@ -1,17 +1,15 @@
 package entity;
-
 import main.Constants;
 import main.GamePanel;
 import main.GameState;
 import main.SpriteSheet;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Appliance {
     GamePanel gp;
     SpriteSheet spriteSheet;
-
+    public boolean isShown;
 
 
 
@@ -24,8 +22,6 @@ public class Appliance {
 
     public void draw(Graphics g, int currentFrame){
         BufferedImage applianceFrame = spriteSheet.getFrame(currentFrame);
-        spriteSheet.frameX = 228;
-        spriteSheet.frameY = 153;
         int applianceX = spriteSheet.frameX*Constants.SCALE;
         int applianceY = spriteSheet.frameY*Constants.SCALE;
         int applianceWidth = applianceFrame.getWidth()*Constants.SCALE*2;

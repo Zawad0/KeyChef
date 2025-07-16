@@ -10,31 +10,43 @@ import java.awt.image.BufferedImage;
 
 public class Player {
     GamePanel gp;
-    SpriteSheet playerSpriteBack;
+    public SpriteSheet playerSpriteBack;
+    public SpriteSheet playerSpriteFrontMenu;
 
 
 
-    public GameState gameState = GameState.CHOPPING;
+    //public GameState gameState = GameState.CHOPPING;
+    public GameState gameState =  GameState.MENU;
 
     public Player(GamePanel gp){
         this.gp = gp;
         {
             try {
-                playerSpriteBack = new SpriteSheet("/player_sprite_back.png", 32);
+                playerSpriteBack = new SpriteSheet("/Sprite-charaback3.png", 32);
+                playerSpriteFrontMenu = new SpriteSheet("/Sprite-charafront.png", 32);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public void draw(Graphics g, int currentFrame){
+    public void drawBack(Graphics g, int currentFrame){
         BufferedImage playerFrame = playerSpriteBack.getFrame(currentFrame);
-        playerSpriteBack.frameX = 220;
-        playerSpriteBack.frameY = 185;
+
         int playerX = playerSpriteBack.frameX* Constants.SCALE;
         int playerY = playerSpriteBack.frameY*Constants.SCALE;
-        int playerWidth = playerFrame.getWidth()*Constants.SCALE*2*2;
-        int playerHeight = playerFrame.getHeight()*Constants.SCALE*2*2;
+        int playerWidth = playerFrame.getWidth()*Constants.SCALE*4;
+        int playerHeight = playerFrame.getHeight()*Constants.SCALE*4;
+        g.drawImage(playerFrame, playerX, playerY, playerWidth, playerHeight, null);
+    }
+
+    public void drawFront(Graphics g, int currentFrame){
+        BufferedImage playerFrame = playerSpriteFrontMenu.getFrame(currentFrame);
+
+        int playerX = playerSpriteFrontMenu.frameX* Constants.SCALE;
+        int playerY = playerSpriteFrontMenu.frameY*Constants.SCALE;
+        int playerWidth = playerFrame.getWidth()*Constants.SCALE*2;
+        int playerHeight = playerFrame.getHeight()*Constants.SCALE*2;
         g.drawImage(playerFrame, playerX, playerY, playerWidth, playerHeight, null);
     }
 
