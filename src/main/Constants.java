@@ -26,10 +26,24 @@ public class Constants {
 
 
     //MENU phase
-    public static final int PLAYER_MENUX = 320;
-    public static final int PLAYER_MENUY = 88;
+    public static final int PLAYER_MENUX = 285;
+    public static final int PLAYER_MENUY = -100;
 
     //IDLE phase
     public static final int PLAYER_IDLEX = 5;
     public static final int PLAYER_IDLEY = 250;
+    public static final int DIALOGUE_WINDOWX = 200;
+    public static final int DIALOGUE_WINDOWY = 510;
+    public static final int DIALOGUE_WINDOW_WIDTH = 800;
+    public static final int DIALOGUE_WINDOW_HEIGHT = 175;
+    public static final int TEXTX = 300, TEXTY = 590;
+    public static  final String DIALOGUE1 = "Hi! Welcome to Key Chef!",
+                                DIALOGUE2 = "Your job is simple.",
+                                DIALOGUE3 = "Press the keys as they appear on the screen..",
+                                DIALOGUE4 = "And you will cook a burger.",
+                                DIALOGUE5 = "Everytime you finish cooking a burger...",
+                                DIALOGUE6 = "You get a point! And also...",
+                                DIALOGUE7 = "Do it correctly and before the timer runs out.",
+                                DIALOGUE8 = "Goodluck to you chef!";
 }
+

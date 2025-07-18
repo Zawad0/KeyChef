@@ -6,6 +6,7 @@ import main.GameState;
 import main.SpriteSheet;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 public class Player {
@@ -17,7 +18,7 @@ public class Player {
 
 
     //public GameState gameState = GameState.CHOPPING;
-    public GameState gameState =  GameState.MENU;
+    public static GameState gameState =  GameState.MENU;
 
     public Player(GamePanel gp){
         this.gp = gp;
@@ -43,13 +44,16 @@ public class Player {
     }
 
     public void drawFront(Graphics g, int currentFrame){
+        Graphics2D g2 = (Graphics2D) g.create();
         BufferedImage playerFrame = playerSpriteFrontMenu.getFrame(currentFrame);
 
         int playerX = playerSpriteFrontMenu.frameX* Constants.SCALE;
         int playerY = playerSpriteFrontMenu.frameY*Constants.SCALE;
         int playerWidth = playerFrame.getWidth()*Constants.SCALE*2;
         int playerHeight = playerFrame.getHeight()*Constants.SCALE*2;
-        g.drawImage(playerFrame, playerX, playerY, playerWidth, playerHeight, null);
+        g2.rotate(Math.toRadians(45),Constants.PLAYER_MENUX+playerWidth/4,Constants.PLAYER_MENUX+playerHeight/4);
+        g2.drawImage(playerFrame, playerX, playerY, playerWidth, playerHeight, null);
+        g2.dispose();
     }
 
     public void drawFrontTalk(Graphics g, int currentFrame){

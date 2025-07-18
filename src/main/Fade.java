@@ -28,8 +28,8 @@ public class Fade extends JPanel {
 //        }
 //    }
 
-    public void transparent(){
-        alphaValue -= 0.01f;
+    public void transparent(float f){
+        alphaValue -= f;
 
         if(alphaValue <0){
             alphaValue = 0;
@@ -56,9 +56,10 @@ public class Fade extends JPanel {
 //    }
 
     public void draw(Graphics g){
-        Graphics2D g2 = (Graphics2D) g;
+        Graphics2D g2 = (Graphics2D) g.create();
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alphaValue));
         g2.setColor(Color.BLACK);
         g2.fillRect(0,0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        g2.dispose();
     }
 }
