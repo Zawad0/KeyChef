@@ -1,12 +1,11 @@
 package entity;
 import main.Constants;
 import main.GamePanel;
-import main.GameState;
 import main.SpriteSheet;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class Appliance {
+public class Materials {
     GamePanel gp;
     SpriteSheet spriteSheet;
     public boolean isShown;
@@ -14,7 +13,7 @@ public class Appliance {
 
 
 
-    public Appliance(GamePanel gp, SpriteSheet spriteSheet){
+    public Materials(GamePanel gp, SpriteSheet spriteSheet){
         this.gp = gp;
         this.spriteSheet = spriteSheet;
 

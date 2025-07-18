@@ -1,6 +1,6 @@
 package main;
 
-import entity.Appliance;
+import entity.Materials;
 import entity.Player;
 
 import javax.imageio.ImageIO;
@@ -9,7 +9,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 public class GamePanel extends JPanel implements Runnable{
@@ -18,17 +17,19 @@ public class GamePanel extends JPanel implements Runnable{
     BufferedImage background;
     BufferedImage backgroundMenu;
     BufferedImage playButton;
+    BufferedImage playButtonDark;
     Rectangle playButtonBounds;
     SpriteSheet choppingSpriteSheet;
     SpriteSheet choppingTomato;
     SpriteSheet choppingOnion;
     SpriteSheet choppingCucumber;
-    SpriteSheet playerSpriteBack;
+    SpriteSheet playerSpriteFrontTalk;
     Player player = new Player(this);
-    Appliance chopping;
-    Appliance tomato;
-    Appliance onion;
-    Appliance cucumber;
+    Materials chopping;
+    Materials tomato;
+    Materials onion;
+    Materials cucumber;
+    Fade fade = new Fade();
     private int currentFrame = 0;
     private double animationTimer = 0;
     boolean isMousePressedOnPlayButton = false;
@@ -39,27 +40,28 @@ public class GamePanel extends JPanel implements Runnable{
         this.setDoubleBuffered(true);
         try {
             background = ImageIO.read(getClass().getResource("/kitchen.png"));
-            backgroundMenu = ImageIO.read(getClass().getResource("/Sprite-menu1.png"));
+            backgroundMenu = ImageIO.read(getClass().getResource("/Sprite-menu.png"));
             playButton = ImageIO.read(getClass().getResource("/playbutton.png"));
-            playButtonBounds = new Rectangle(357, 315, 154, 48);
+            playButtonDark = ImageIO.read(getClass().getResource("/playbuttondark.png"));
+            playButtonBounds = new Rectangle(357, 315, 154*2, 48*2);
 
             choppingSpriteSheet = new SpriteSheet("/chopping.png", 64);
-            chopping = new Appliance(this, choppingSpriteSheet);
+            chopping = new Materials(this, choppingSpriteSheet);
 
             choppingTomato = new SpriteSheet("/tomato_slice.png", 32);
             choppingTomato.frameX = Constants.TOMATOX;
             choppingTomato.frameY = Constants.TOMATOY;
-            tomato = new Appliance(this, choppingTomato);
+            tomato = new Materials(this, choppingTomato);
 
             choppingOnion = new SpriteSheet("/onion_slice.png", 32);
             choppingOnion.frameX = Constants.ONIONX;
             choppingOnion.frameY = Constants.ONIONY;
-            onion = new Appliance(this, choppingOnion);
+            onion = new Materials(this, choppingOnion);
 
             choppingCucumber = new SpriteSheet("/cucumber_slice.png",32);
             choppingCucumber.frameX = Constants.CUCUMBERX;
             choppingCucumber.frameY = Constants.CUCUMBERY;
-            cucumber = new Appliance(this, choppingCucumber);
+            cucumber = new Materials(this, choppingCucumber);
 
             addMouseListener(new MouseAdapter() {
                 @Override
@@ -74,7 +76,7 @@ public class GamePanel extends JPanel implements Runnable{
                 public void mouseReleased(MouseEvent e) {
                     super.mouseReleased(e);
                     if(player.gameState == GameState.MENU && playButtonBounds.contains(e.getPoint())){
-                        player.gameState = GameState.CHOPPING;
+                        player.gameState = GameState.IDLE;
                     }
                     isMousePressedOnPlayButton = false;
                 }
@@ -116,7 +118,7 @@ public class GamePanel extends JPanel implements Runnable{
             repaint();
 
             try{
-                Thread.sleep(32);
+                Thread.sleep(Constants.FPS_CAP);
             } catch (Exception e) {
 
             }
@@ -183,6 +185,23 @@ public class GamePanel extends JPanel implements Runnable{
                         currentFrame = 0;
                     }
                 }
+                break;
+
+            case IDLE:
+                fade.transparent();
+                animationTimer += dt;
+                player.playerSpriteFrontTalk.frameX = Constants.PLAYER_IDLEX;
+                player.playerSpriteFrontTalk.frameY = Constants.PLAYER_IDLEY;
+
+                if (animationTimer >= Constants.FRAME_DURATION) {
+                    animationTimer = 0;
+                    currentFrame++;
+                    if (currentFrame >= choppingSpriteSheet.getFrameCount()) {
+                        currentFrame = 0;
+                    }
+                }
+                break;
+
 
         }
 
@@ -211,8 +230,30 @@ public class GamePanel extends JPanel implements Runnable{
 
             case MENU:
                 g.drawImage(backgroundMenu,0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT, null);
-                g.drawImage(playButton, playButtonBounds.x, playButtonBounds.y, playButtonBounds.width*2, playButtonBounds.height*2, null);
+
+                if(isMousePressedOnPlayButton){
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.drawImage(playButtonDark, playButtonBounds.x, playButtonBounds.y, playButtonBounds.width, playButtonBounds.height, null);
+
+                }
+                else{
+                    g.drawImage(playButton, playButtonBounds.x, playButtonBounds.y, playButtonBounds.width, playButtonBounds.height, null);
+                }
+
                 player.drawFront(g, currentFrame);
+                break;
+
+            case IDLE:
+
+                Graphics2D g2 = (Graphics2D) g;
+                g.drawImage(background,0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT, null);
+                Color overlay = new Color(0, 0,0, 150);
+                g2.setColor(overlay);
+                g2.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+
+                player.drawFrontTalk(g,currentFrame);
+
+                fade.draw(g);
                 break;
             default:
                 g.drawImage(background,0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT, null);

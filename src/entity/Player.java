@@ -12,6 +12,7 @@ public class Player {
     GamePanel gp;
     public SpriteSheet playerSpriteBack;
     public SpriteSheet playerSpriteFrontMenu;
+    public SpriteSheet playerSpriteFrontTalk;
 
 
 
@@ -24,6 +25,7 @@ public class Player {
             try {
                 playerSpriteBack = new SpriteSheet("/Sprite-charaback3.png", 32);
                 playerSpriteFrontMenu = new SpriteSheet("/Sprite-charafront.png", 32);
+                playerSpriteFrontTalk = new SpriteSheet("/Sprite-charafront_talk.png", 32);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -47,6 +49,16 @@ public class Player {
         int playerY = playerSpriteFrontMenu.frameY*Constants.SCALE;
         int playerWidth = playerFrame.getWidth()*Constants.SCALE*2;
         int playerHeight = playerFrame.getHeight()*Constants.SCALE*2;
+        g.drawImage(playerFrame, playerX, playerY, playerWidth, playerHeight, null);
+    }
+
+    public void drawFrontTalk(Graphics g, int currentFrame){
+        BufferedImage playerFrame = playerSpriteFrontTalk.getFrame(currentFrame);
+
+        int playerX = playerSpriteFrontTalk.frameX* Constants.SCALE;
+        int playerY = playerSpriteFrontTalk.frameY*Constants.SCALE;
+        int playerWidth = playerFrame.getWidth()*Constants.SCALE*5;
+        int playerHeight = playerFrame.getHeight()*Constants.SCALE*5;
         g.drawImage(playerFrame, playerX, playerY, playerWidth, playerHeight, null);
     }
 
