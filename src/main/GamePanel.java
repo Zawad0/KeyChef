@@ -2,14 +2,20 @@ package main;
 
 import entity.Materials;
 import entity.Player;
+import minigames.TypeGame;
+//import minigames.WordBank;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GamePanel extends JPanel implements Runnable{
 
@@ -25,19 +31,14 @@ public class GamePanel extends JPanel implements Runnable{
     Rectangle playButtonBounds;
     Rectangle startButtonBounds;
     SpriteSheet choppingSpriteSheet;
-    SpriteSheet choppingTomato;
-    SpriteSheet choppingOnion;
-    SpriteSheet choppingCucumber;
-    SpriteSheet playerSpriteFrontTalk;
     Player player = new Player(this);
 
-    Materials chopping;
-    Materials tomato;
-    Materials onion;
-    Materials cucumber;
+    Materials materials;
 
     UI ui = new UI();
-    Fade fade = new Fade();
+    Fade fade = new Fade(1f);
+
+    //KeyHandler keyHandler = new KeyHandler();
 
     private int currentFrame = 0;
     private double animationTimer = 0;
@@ -50,13 +51,21 @@ public class GamePanel extends JPanel implements Runnable{
     int textIndex = 1;
     boolean typing = false;
 
+    TypeGame typeGame = new TypeGame();
+
+
 
 
     GamePanel(){
         this.setPreferredSize(new Dimension(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
+        //this.addKeyListener(keyHandler);
+        //this.setFocusable(true);
         try {
+            typeGame.words.printWords();
+
+            materials = new Materials(this);
             background = ImageIO.read(getClass().getResource("/kitchen.png"));
             backgroundMenu = ImageIO.read(getClass().getResource("/Sprite-menuBoardless.png"));
             menuBoard = ImageIO.read(getClass().getResource("/Sprite-board.png"));
@@ -67,27 +76,52 @@ public class GamePanel extends JPanel implements Runnable{
             startButtonDark = ImageIO.read(getClass().getResource("/startbuttondark.png"));
             playButtonBounds = new Rectangle(357, 315, 154*2, 48*2);
             startButtonBounds = new Rectangle(357, 550, 154*2, 48*2);
+            setFocusable(true);
+            requestFocusInWindow();
 
+            addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
 
+                }
 
-            choppingSpriteSheet = new SpriteSheet("/chopping.png", 64);
-            chopping = new Materials(this, choppingSpriteSheet);
+                @Override
+                public void keyPressed(KeyEvent e) {
+//                    if(Player.gameState == GameState.CHOPPING && e.getKeyCode() == KeyEvent.VK_SPACE){
+//                        resetAnimation();
+//                        fade.reset(1f);
+//                        Player.gameState = GameState.FRYING;
+//
+//                    }
 
-            choppingTomato = new SpriteSheet("/tomato_slice.png", 32);
-            choppingTomato.frameX = Constants.TOMATOX;
-            choppingTomato.frameY = Constants.TOMATOY;
-            tomato = new Materials(this, choppingTomato);
+                    char pressed = Character.toUpperCase(e.getKeyChar());
+                    String currentWord = typeGame.currentWordsList.get(typeGame.currentWordIndex);
+                    char currentChar = currentWord.charAt(typeGame.currentCharIndex);
+                    if(pressed == currentChar){
 
-            choppingOnion = new SpriteSheet("/onion_slice.png", 32);
-            choppingOnion.frameX = Constants.ONIONX;
-            choppingOnion.frameY = Constants.ONIONY;
-            onion = new Materials(this, choppingOnion);
+                        List<BufferedImage> spriteList = typeGame.currentWords.get(currentWord);
+                        spriteList.set(typeGame.currentCharIndex, typeGame.keys.getPr(String.valueOf(currentChar)));
 
-            choppingCucumber = new SpriteSheet("/cucumber_slice.png",32);
-            choppingCucumber.frameX = Constants.CUCUMBERX;
-            choppingCucumber.frameY = Constants.CUCUMBERY;
-            cucumber = new Materials(this, choppingCucumber);
+                        typeGame.currentCharIndex++;
 
+                        if(typeGame.currentCharIndex >= currentWord.length()){
+                            typeGame.currentCharIndex = 0;
+                            typeGame.currentWordIndex++;
+
+                            if(typeGame.currentWordIndex>=typeGame.currentWordsList.size()){
+                                resetAnimation();
+                                fade.reset(2f);
+                                Player.gameState = GameState.FRYING;
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+
+                }
+            });
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
@@ -113,7 +147,8 @@ public class GamePanel extends JPanel implements Runnable{
                             ui.currentDialogue = ui.fullText;
                             typing = false;
                         }
-                        if(textIndex >= 8){
+                        if(textIndex > 8){
+                            resetAnimation();
                             Player.gameState = GameState.IDLE;
                         }
 
@@ -122,6 +157,7 @@ public class GamePanel extends JPanel implements Runnable{
 
                     if(Player.gameState == GameState.IDLE && startButtonBounds.contains(e.getPoint())){
                         wasStartPressed = true;
+                        fade.reset(1f);
 
                     }
 
@@ -177,7 +213,7 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void update(double dt){
-        //System.out.println(1/dt + "fps");
+//        System.out.println(String.format("%.2f", 1/dt) + "fps"); //Shows FPS in logs
 
         animationUpdater(dt);
         ui.type(dt);
@@ -191,15 +227,25 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
 
-
+    void resetAnimation(){
+        animationTimer = 0;
+        currentFrame = 0;
+    }
     void animationUpdater(double dt){
         switch (Player.gameState) {
             case CHOPPING:
+
+                if(!typeGame.areWordsShown){
+                    typeGame.currentWords = typeGame.getMap(5);
+                    typeGame.currentWordsList = new ArrayList<>(typeGame.currentWords.keySet());
+                    typeGame.areWordsShown = true;
+                }
+
                 System.out.println("CHOPPING");
                 animationTimer += dt;
                 fade.transparent(0.024f);
-                choppingSpriteSheet.frameX = Constants.CHOPX;
-                choppingSpriteSheet.frameY = Constants.CHOPY;
+                materials.chopping.frameX = Constants.CHOPX;
+                materials.chopping.frameY = Constants.CHOPY;
 
 
                 player.playerSpriteBack.frameX = Constants.PLAYERX;
@@ -207,23 +253,41 @@ public class GamePanel extends JPanel implements Runnable{
 
 
                 if(currentFrame >= 12){
-                    tomato.isShown = true;
+                    materials.tomatoShown = true;
                 }
                 if(currentFrame >=24){
-                    onion.isShown = true;
+                    materials.onionShown = true;
                 }
                 if(currentFrame<=12){
-                    tomato.isShown = false;
-                    onion.isShown = false;
-                    cucumber.isShown = false;
+                    materials.tomatoShown = false;
+                    materials.onionShown = false;
+                    materials.cucumberShown = false;
                 }
 
 
                 if (animationTimer >= Constants.FRAME_DURATION) {
                     animationTimer = 0;
                     currentFrame++;
-                    if (currentFrame >= choppingSpriteSheet.getFrameCount()) {
-                        currentFrame = 0; // This loops the animation
+                    if (currentFrame >= materials.chopping.getFrameCount()) {
+                        currentFrame = 0;
+                    }
+                }
+
+                break;
+
+            case FRYING:
+                animationTimer+=dt;
+                fade.transparent(0.05f);
+                materials.frying.frameX = Constants.FRYX;
+                materials.frying.frameY = Constants.FRYY;
+
+                if(fade.alphaValue <= 0){
+                    if (animationTimer >= Constants.FRY_FRAME_DURATION) {
+                        animationTimer = 0;
+                        currentFrame++;
+                        if (currentFrame >= materials.frying.getFrameCount()) {
+                            currentFrame = 15;
+                        }
                     }
                 }
 
@@ -238,7 +302,7 @@ public class GamePanel extends JPanel implements Runnable{
                 if (animationTimer >= Constants.FRAME_DURATION) {
                     animationTimer = 0;
                     currentFrame++;
-                    if (currentFrame >= choppingSpriteSheet.getFrameCount()) {
+                    if (currentFrame >= player.playerSpriteFrontMenu.getFrameCount()) {
                         currentFrame = 0;
                     }
                 }
@@ -311,7 +375,7 @@ public class GamePanel extends JPanel implements Runnable{
                 if (animationTimer >= Constants.FRAME_DURATION) {
                     animationTimer = 0;
                     currentFrame++;
-                    if (currentFrame >= choppingSpriteSheet.getFrameCount()) {
+                    if (currentFrame >= player.playerSpriteFrontTalk.getFrameCount()) {
                         currentFrame = 0;
                     }
                 }
@@ -330,21 +394,34 @@ public class GamePanel extends JPanel implements Runnable{
 
         switch (Player.gameState) {
             case CHOPPING:
-                g.drawImage(background,-800,-100, Constants.SCREEN_WIDTH*2,Constants.SCREEN_HEIGHT*2, null);
-                chopping.draw(g, currentFrame);
+                g.drawImage(background,-800,-100, Constants.SCREEN_WIDTH*Constants.SCALE,Constants.SCREEN_HEIGHT*Constants.SCALE, null);
+                materials.drawChopping(g, currentFrame);
                 player.drawBack(g, currentFrame);
-                if(tomato.isShown){
-                    tomato.draw(g, currentFrame);
+                if(materials.tomatoShown){
+                    g.drawImage(materials.choppingTomato, Constants.TOMATOX, Constants.TOMATOY,
+                            materials.choppingTomato.getWidth()*3, materials.choppingTomato.getHeight()*3, null);
                 }
-                if(onion.isShown){
-                    onion.draw(g, currentFrame);
+                if(materials.onionShown){
+                    g.drawImage(materials.choppingOnion, Constants.ONIONX, Constants.ONIONY,
+                            materials.choppingOnion.getWidth()*3, materials.choppingOnion.getHeight()*3, null);
                 }
-                if(cucumber.isShown){
-                    cucumber.draw(g, currentFrame);
+                if(materials.cucumberShown){
+                    g.drawImage(materials.choppingCucumber, Constants.CUCUMBERX, Constants.CUCUMBERY,
+                            materials.choppingCucumber.getWidth()*3, materials.choppingCucumber.getHeight()*3, null);
                 }
+                typeGame.draw(g);
                 fade.draw(g);
                 break;
 
+            case FRYING:
+                Graphics2D gF = (Graphics2D) g;
+                g.drawImage(background, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT, null);
+                Color overlayF = new Color(0, 0,0, 190);
+                gF.setColor(overlayF);
+                gF.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+                materials.drawFrying(g, currentFrame);
+                fade.draw(g);
+                break;
 
             case MENU:
                 g.drawImage(backgroundMenu,0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT, null);
@@ -352,7 +429,7 @@ public class GamePanel extends JPanel implements Runnable{
                 g.drawImage(menuBoard,0,0,menuBoard.getWidth()*2, menuBoard.getHeight()*2, null);
                 if(isMousePressedOnPlayButton){
                     Graphics2D g2 = (Graphics2D) g.create();
-                    g2.drawImage(playButtonDark, playButtonBounds.x, playButtonBounds.y, playButtonBounds.width, playButtonBounds.height, null);
+                    //g2.drawImage(playButtonDark, playButtonBounds.x, playButtonBounds.y, playButtonBounds.width, playButtonBounds.height, null); //key drawing debug
 
                 }
                 else{
@@ -364,11 +441,11 @@ public class GamePanel extends JPanel implements Runnable{
 
             case DIALOGUE:
 
-                Graphics2D g2 = (Graphics2D) g;
+                Graphics2D gD = (Graphics2D) g;
                 g.drawImage(background,0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT, null);
-                Color overlay = new Color(0, 0,0, 150);
-                g2.setColor(overlay);
-                g2.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+                Color overlayD = new Color(0, 0,0, 150);
+                gD.setColor(overlayD);
+                gD.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
 
                 player.drawFrontTalk(g,currentFrame);
                 ui.draw(g);

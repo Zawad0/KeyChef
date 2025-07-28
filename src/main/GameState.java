@@ -4,7 +4,7 @@ public enum GameState {
     MENU,
     IDLE,
     DIALOGUE,
-    COOKING,
+    FRYING,
     CHOPPING,
     ASSEMBLE,
     SERVE,

@@ -7,7 +7,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
+import java.util.Objects;
 
 
 public class UI{
@@ -24,9 +24,9 @@ public class UI{
     UI(){
 
         try {
-            pixelFont = Font.createFont(Font.TRUETYPE_FONT, getClass().
-                    getResourceAsStream("/PixelifySans-VariableFont_wght.ttf"));
-            dialogue = ImageIO.read(getClass().getResource("/Sprite-Dialogue.png"));
+            pixelFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().
+                    getResourceAsStream("/PixelifySans-VariableFont_wght.ttf")));
+            dialogue = ImageIO.read(Objects.requireNonNull(getClass().getResource("/Sprite-Dialogue.png")));
 
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(pixelFont);

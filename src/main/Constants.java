@@ -17,12 +17,18 @@ public class Constants {
     public static final int PLAYERX = 210;
     public static final int PLAYERY = 175;
 
-    public static final int TOMATOX = 340;
-    public static final int TOMATOY = 175;
-    public static final int ONIONX = 330;
-    public static final int ONIONY = 190;
-    public static final int CUCUMBERX = 340;
-    public static final int CUCUMBERY = 200;
+    public static final int TOMATOX = 670;
+    public static final int TOMATOY = 380;
+    public static final int ONIONX = 660;
+    public static final int ONIONY = 395;
+    public static final int CUCUMBERX = 670;
+    public static final int CUCUMBERY = 305;
+
+
+    //Frying phase locations
+    public static final int FRYX = 100;
+    public static final int FRYY = 100;
+    public static final double FRY_FRAME_DURATION = 0.150;
 
 
     //MENU phase
@@ -39,11 +45,11 @@ public class Constants {
     public static final int TEXTX = 300, TEXTY = 590;
     public static  final String DIALOGUE1 = "Hi! Welcome to Key Chef!",
                                 DIALOGUE2 = "Your job is simple.",
-                                DIALOGUE3 = "Press the keys as they appear on the screen..",
-                                DIALOGUE4 = "And you will cook a burger.",
+                                DIALOGUE3 = "Press the keys as they appear on the screen while..",
+                                DIALOGUE4 = "You are making a burger.",
                                 DIALOGUE5 = "Everytime you finish cooking a burger...",
-                                DIALOGUE6 = "You get a point! And also...",
-                                DIALOGUE7 = "Do it correctly and before the timer runs out.",
+                                DIALOGUE6 = "You get a point!   But also...",
+                                DIALOGUE7 = "Make sure to type before the timer runs out!!",
                                 DIALOGUE8 = "Goodluck to you chef!";
 }
 
