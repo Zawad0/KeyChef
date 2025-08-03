@@ -24,13 +24,14 @@ public class UI{
     UI(){
 
         try {
+
             pixelFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().
                     getResourceAsStream("/PixelifySans-VariableFont_wght.ttf")));
             dialogue = ImageIO.read(Objects.requireNonNull(getClass().getResource("/Sprite-Dialogue.png")));
 
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(pixelFont);
-        } catch (IOException | FontFormatException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

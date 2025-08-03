@@ -18,7 +18,7 @@ public class Player {
 
 
     //public GameState gameState = GameState.CHOPPING;
-    public static GameState gameState =  GameState.MENU;
+    public static GameState gameState =  GameState.CHOPPING;
 
     public Player(GamePanel gp){
         this.gp = gp;

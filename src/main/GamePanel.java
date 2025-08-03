@@ -3,7 +3,6 @@ package main;
 import entity.Materials;
 import entity.Player;
 import minigames.TypeGame;
-//import minigames.WordBank;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -139,7 +138,7 @@ public class GamePanel extends JPanel implements Runnable{
                     if( Player.gameState == GameState.MENU && playButtonBounds.contains( e.getPoint())){
                         wasMousePressed = true;
                         delayTimer = 0;
-                        //player.gameState = GameState.IDLE;
+
                     }
 
                     if(Player.gameState == GameState.DIALOGUE){
@@ -152,7 +151,7 @@ public class GamePanel extends JPanel implements Runnable{
                             Player.gameState = GameState.IDLE;
                         }
 
-                        //player.gameState = GameState.IDLE;
+
                     }
 
                     if(Player.gameState == GameState.IDLE && startButtonBounds.contains(e.getPoint())){
@@ -224,6 +223,10 @@ public class GamePanel extends JPanel implements Runnable{
             wasStartPressed = false;
         }
 
+        if(typeGame.timerBar.progressVal <= 0){
+            //game over
+        }
+
     }
 
 
@@ -235,13 +238,14 @@ public class GamePanel extends JPanel implements Runnable{
         switch (Player.gameState) {
             case CHOPPING:
 
+                typeGame.timerBar.update(dt);
                 if(!typeGame.areWordsShown){
                     typeGame.currentWords = typeGame.getMap(5);
                     typeGame.currentWordsList = new ArrayList<>(typeGame.currentWords.keySet());
                     typeGame.areWordsShown = true;
                 }
 
-                System.out.println("CHOPPING");
+                //System.out.println("CHOPPING");
                 animationTimer += dt;
                 fade.transparent(0.024f);
                 materials.chopping.frameX = Constants.CHOPX;
@@ -409,7 +413,7 @@ public class GamePanel extends JPanel implements Runnable{
                     g.drawImage(materials.choppingCucumber, Constants.CUCUMBERX, Constants.CUCUMBERY,
                             materials.choppingCucumber.getWidth()*3, materials.choppingCucumber.getHeight()*3, null);
                 }
-                typeGame.draw(g);
+                typeGame.draw(g, currentFrame);
                 fade.draw(g);
                 break;
 

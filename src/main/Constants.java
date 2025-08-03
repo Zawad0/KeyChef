@@ -13,6 +13,8 @@ public class Constants {
 
     public static final int CHOPX = 228;
     public static final int CHOPY = 153;
+    public static final int TIMERX = 40;
+    public static final int TIMERY = 10;
 
     public static final int PLAYERX = 210;
     public static final int PLAYERY = 175;
@@ -26,8 +28,8 @@ public class Constants {
 
 
     //Frying phase locations
-    public static final int FRYX = 100;
-    public static final int FRYY = 100;
+    public static final int FRYX = 110;
+    public static final int FRYY = 130;
     public static final double FRY_FRAME_DURATION = 0.150;
 
 
@@ -45,11 +47,11 @@ public class Constants {
     public static final int TEXTX = 300, TEXTY = 590;
     public static  final String DIALOGUE1 = "Hi! Welcome to Key Chef!",
                                 DIALOGUE2 = "Your job is simple.",
-                                DIALOGUE3 = "Press the keys as they appear on the screen while..",
-                                DIALOGUE4 = "You are making a burger.",
+                                DIALOGUE3 = "Play through 3 minigames and",
+                                DIALOGUE4 = "a burger will be made.",
                                 DIALOGUE5 = "Everytime you finish cooking a burger...",
-                                DIALOGUE6 = "You get a point!   But also...",
-                                DIALOGUE7 = "Make sure to type before the timer runs out!!",
+                                DIALOGUE6 = "You get 1 point!   But also...",
+                                DIALOGUE7 = "Make sure to finish before the timer runs out!! ",
                                 DIALOGUE8 = "Goodluck to you chef!";
 }
 

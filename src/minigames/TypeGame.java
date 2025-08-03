@@ -18,22 +18,59 @@ public class TypeGame {
     public Map<String, List<BufferedImage>>currentWords;
     public WordBank words = new WordBank("words_alpha_common.txt");
     public Keys keys = new Keys();
+    public TimerBar timerBar = new TimerBar("/progress_bar.png",5);
 
     public List<String>currentWordsList;
     public int currentWordIndex = 0;
     public int currentCharIndex = 0;
 
-    public void draw(Graphics g){
-        int x=70, y=120;
+    BufferedImage barBack;
+    BufferedImage barFrame;
+    SpriteSheet clock;
+
+    int totalTime = 5000;
+    long startTime;
+    boolean timerStart = false;
+
+    public TypeGame(){
+
+        try {
+            barFrame = ImageIO.read(Objects.requireNonNull(getClass().getResource("/bar.png")));
+            clock = new SpriteSheet("/clock.png",32);
+            barBack = ImageIO.read(Objects.requireNonNull(getClass().getResource("/bar_background.png")));
+            clock.frameX = 55;
+            clock.frameY = 30;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+    public void draw(Graphics g, int currentFrame){
+        int x=70, y=175;
+        BufferedImage clockFrame = clock.getFrame(currentFrame);
+        int clockScaledWidth = clockFrame.getWidth()*3;
+        int clockScaledHeight = clockFrame.getHeight()*3;
+
         for(List<BufferedImage> i : currentWords.values()){
             for(BufferedImage j : i){
-                g.drawImage(j, x,y, j.getWidth()*2, (int) (j.getHeight()*2.5),null);
+                g.drawImage(j, x,y, (int) (j.getWidth()*2.2), (int) (j.getHeight()*2.2),null);
                 x+=32;
             }
             x+=45;
         }
+        g.drawImage(barBack, Constants.TIMERX, Constants.TIMERY, barFrame.getWidth()*Constants.SCALE,
+                barFrame.getHeight()*Constants.SCALE, null);
+        timerBar.draw(g);
+        g.drawImage(barFrame, Constants.TIMERX, Constants.TIMERY, barFrame.getWidth()*Constants.SCALE,
+                barFrame.getHeight()*Constants.SCALE, null);
+        g.drawImage(clockFrame,clock.frameX,clock.frameY,clockScaledWidth, clockScaledHeight, null);
+
 
     }
+
+
+
 
 
     public class Keys {

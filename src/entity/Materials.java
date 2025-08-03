@@ -55,8 +55,8 @@ public class Materials {
         BufferedImage applianceFrame = frying.getFrame(currentFrame);
         int applianceX = frying.frameX*Constants.SCALE;
         int applianceY = frying.frameY*Constants.SCALE;
-        int applianceWidth = applianceFrame.getWidth()*Constants.SCALE;
-        int applianceHeight = applianceFrame.getHeight()*Constants.SCALE;
+        int applianceWidth = (int) (applianceFrame.getWidth()*1.75);
+        int applianceHeight = (int) (applianceFrame.getHeight()*1.75);
         g.drawImage(applianceFrame, applianceX, applianceY, applianceWidth, applianceHeight, null);
     }
 
