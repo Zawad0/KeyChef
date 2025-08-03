@@ -12,13 +12,14 @@ import java.util.Objects;
 
 public class UI{
     BufferedImage dialogue;
-
     public String fullText;
     public String currentDialogue = "";
     private double typeTimer = 0;
     private int charIndex = 0;
     private double typeSpeed = 0.05;
     public boolean typing = false;
+    public int textIndex = 1;
+    public boolean typingOut = false;
     Font pixelFont;
 
     UI(){
@@ -33,6 +34,51 @@ public class UI{
             ge.registerFont(pixelFont);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void say(){
+        switch (textIndex){
+            case 1:
+                startTyping(Constants.DIALOGUE1);
+                textIndex++;
+                typingOut = true;
+                break;
+            case 2:
+                startTyping(Constants.DIALOGUE2);
+                textIndex++;
+                typingOut = true;
+                break;
+            case 3:
+                startTyping(Constants.DIALOGUE3);
+                textIndex++;
+                typingOut = true;
+                break;
+            case 4:
+                startTyping(Constants.DIALOGUE4);
+                textIndex++;
+                typingOut = true;
+                break;
+            case 5:
+                startTyping(Constants.DIALOGUE5);
+                textIndex++;
+                typingOut = true;
+                break;
+            case 6:
+                startTyping(Constants.DIALOGUE6);
+                textIndex++;
+                typingOut = true;
+                break;
+            case 7:
+                startTyping(Constants.DIALOGUE7);
+                textIndex++;
+                typingOut = true;
+                break;
+            case 8:
+                startTyping(Constants.DIALOGUE8);
+                textIndex++;
+                typingOut = true;
+                break;
         }
     }
 

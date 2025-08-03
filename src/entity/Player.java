@@ -14,13 +14,15 @@ public class Player {
     public SpriteSheet playerSpriteBack;
     public SpriteSheet playerSpriteFrontMenu;
     public SpriteSheet playerSpriteFrontTalk;
+    double animationTimer = 0;
+    int currentFrame = 0;
 
 
 
     //public GameState gameState = GameState.CHOPPING;
-    public static GameState gameState =  GameState.CHOPPING;
+    public static GameState gameState =  GameState.IDLE;
 
-    public Player(GamePanel gp){
+    public Player(){
         this.gp = gp;
         {
             try {
@@ -33,8 +35,27 @@ public class Player {
         }
     }
 
-    public void drawBack(Graphics g, int currentFrame){
+
+    public void reset(){
+        animationTimer =0;
+        currentFrame = 0;
+    }
+    public void drawBack(Graphics g, double dt){
+        animationTimer+=dt;
+
+
+        if (animationTimer >= Constants.FRAME_DURATION) {
+            animationTimer = 0;
+            currentFrame++;
+            if (currentFrame >= playerSpriteBack.getFrameCount()) {
+                currentFrame = 0;
+            }
+        }
+
+        playerSpriteBack.frameX = Constants.PLAYERX;
+        playerSpriteBack.frameY = Constants.PLAYERY;
         BufferedImage playerFrame = playerSpriteBack.getFrame(currentFrame);
+
 
         int playerX = playerSpriteBack.frameX* Constants.SCALE;
         int playerY = playerSpriteBack.frameY*Constants.SCALE;
@@ -43,8 +64,50 @@ public class Player {
         g.drawImage(playerFrame, playerX, playerY, playerWidth, playerHeight, null);
     }
 
-    public void drawFront(Graphics g, int currentFrame){
+
+    public void drawBackIdle(Graphics g, double dt){
+        animationTimer+=dt;
+
+
+        if (animationTimer >= Constants.FRAME_DURATION && animationTimer>=Materials.delay) {
+            animationTimer = 0;
+            currentFrame++;
+            if (currentFrame >= playerSpriteBack.getFrameCount()) {
+                currentFrame = 0;
+            }
+        }
+
+        if(Constants.stationSwitch == 1){
+            playerSpriteBack.frameX = 305;
+            playerSpriteBack.frameY = 110;
+        } else if (Constants.stationSwitch == 2) {
+            playerSpriteBack.frameX = 250;
+            playerSpriteBack.frameY = 115;
+        }
+
+        BufferedImage playerFrame = playerSpriteBack.getFrame(currentFrame);
+
+
+        int playerX = playerSpriteBack.frameX* Constants.SCALE;
+        int playerY = playerSpriteBack.frameY*Constants.SCALE;
+        int playerWidth = playerFrame.getWidth()*Constants.SCALE*2;
+        int playerHeight = playerFrame.getHeight()*Constants.SCALE*2;
+        g.drawImage(playerFrame, playerX, playerY, playerWidth, playerHeight, null);
+    }
+
+    public void drawFront(Graphics g, double dt){
         Graphics2D g2 = (Graphics2D) g.create();
+        animationTimer+=dt;
+        playerSpriteFrontMenu.frameX = Constants.PLAYER_MENUX;
+        playerSpriteFrontMenu.frameY = Constants.PLAYER_MENUY;
+        if (animationTimer >= Constants.FRAME_DURATION) {
+            animationTimer = 0;
+            currentFrame++;
+            if (currentFrame >= playerSpriteFrontMenu.getFrameCount()) {
+                currentFrame = 0;
+            }
+        }
+
         BufferedImage playerFrame = playerSpriteFrontMenu.getFrame(currentFrame);
 
         int playerX = playerSpriteFrontMenu.frameX* Constants.SCALE;
@@ -56,7 +119,21 @@ public class Player {
         g2.dispose();
     }
 
-    public void drawFrontTalk(Graphics g, int currentFrame){
+    public void drawFrontTalk(Graphics g, double dt){
+        animationTimer += dt;
+        playerSpriteFrontTalk.frameX = Constants.PLAYER_IDLEX;
+        playerSpriteFrontTalk.frameY = Constants.PLAYER_IDLEY;
+
+
+        if (animationTimer >= Constants.FRAME_DURATION) {
+            animationTimer = 0;
+            currentFrame++;
+            if (currentFrame >= playerSpriteFrontTalk.getFrameCount()) {
+                currentFrame = 0;
+            }
+        }
+
+
         BufferedImage playerFrame = playerSpriteFrontTalk.getFrame(currentFrame);
 
         int playerX = playerSpriteFrontTalk.frameX* Constants.SCALE;

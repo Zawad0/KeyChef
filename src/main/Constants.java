@@ -23,13 +23,20 @@ public class Constants {
     public static final int TOMATOY = 380;
     public static final int ONIONX = 660;
     public static final int ONIONY = 395;
-    public static final int CUCUMBERX = 670;
-    public static final int CUCUMBERY = 305;
+    public static final int CUCUMBERX = 660;
+    public static final int CUCUMBERY = 410;
+
+    public static final int IDLETOMATOX = 730;
+    public static final int IDLETOMATOY = 230;
+    public static final int IDLEONIONX = 720;
+    public static final int IDLEONIONY = 240;
+    public static final int IDLECUCUMBERX = 720;
+    public static final int IDLECUCUMBERY = 250;
 
 
     //Frying phase locations
-    public static final int FRYX = 110;
-    public static final int FRYY = 130;
+    public static final int FRYX = 90;
+    public static final int FRYY = 0;
     public static final double FRY_FRAME_DURATION = 0.150;
 
 
@@ -38,6 +45,7 @@ public class Constants {
     public static final int PLAYER_MENUY = -100;
 
     //IDLE phase
+    public static int stationSwitch = 1;
     public static final int PLAYER_IDLEX = 5;
     public static final int PLAYER_IDLEY = 250;
     public static final int DIALOGUE_WINDOWX = 200;
