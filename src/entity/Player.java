@@ -6,7 +6,7 @@ import main.GameState;
 import main.SpriteSheet;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
+
 import java.awt.image.BufferedImage;
 
 public class Player {
@@ -20,10 +20,9 @@ public class Player {
 
 
     //public GameState gameState = GameState.CHOPPING;
-    public static GameState gameState =  GameState.IDLE;
+    public static GameState gameState =  GameState.FRYING;
 
     public Player(){
-        this.gp = gp;
         {
             try {
                 playerSpriteBack = new SpriteSheet("/Sprite-charaback3.png", 32);

@@ -2,6 +2,7 @@ package main;
 
 import entity.Materials;
 import entity.Player;
+import minigames.KeyGame;
 import minigames.TypeGame;
 
 import javax.imageio.ImageIO;
@@ -15,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class GamePanel extends JPanel implements Runnable{
 
@@ -29,18 +31,17 @@ public class GamePanel extends JPanel implements Runnable{
 
     Rectangle playButtonBounds;
     Rectangle startButtonBounds;
-    SpriteSheet choppingSpriteSheet;
     Player player = new Player();
 
     Materials materials;
+    KeyGame keyGame = new KeyGame();
+
 
     UI ui = new UI();
     Fade fade = new Fade(1f);
 
     //KeyHandler keyHandler = new KeyHandler();
     double deltaTime = 0;
-    private int currentFrame = 0;
-    private double animationTimer = 0;
 
     boolean isMousePressedOnPlayButton = false;
     double delayTimer = 0;
@@ -60,16 +61,15 @@ public class GamePanel extends JPanel implements Runnable{
         //this.setFocusable(true);
         try {
             typeGame.words.printWords();
-
             materials = new Materials(this);
-            background = ImageIO.read(getClass().getResource("/kitchen.png"));
-            backgroundMenu = ImageIO.read(getClass().getResource("/Sprite-menuBoardless.png"));
-            menuBoard = ImageIO.read(getClass().getResource("/Sprite-board.png"));
+            background = ImageIO.read(Objects.requireNonNull(getClass().getResource("/kitchen.png")));
+            backgroundMenu = ImageIO.read(Objects.requireNonNull(getClass().getResource("/Sprite-menuBoardless.png")));
+            menuBoard = ImageIO.read(Objects.requireNonNull(getClass().getResource("/Sprite-board.png")));
             System.out.println("Width "+menuBoard.getWidth()+" Height "+menuBoard.getHeight());
-            playButton = ImageIO.read(getClass().getResource("/playbutton.png"));
-            playButtonDark = ImageIO.read(getClass().getResource("/playbuttondark.png"));
-            startButton = ImageIO.read(getClass().getResource("/startbutton.png"));
-            startButtonDark = ImageIO.read(getClass().getResource("/startbuttondark.png"));
+            playButton = ImageIO.read(Objects.requireNonNull(getClass().getResource("/playbutton.png")));
+            playButtonDark = ImageIO.read(Objects.requireNonNull(getClass().getResource("/playbuttondark.png")));
+            startButton = ImageIO.read(Objects.requireNonNull(getClass().getResource("/startbutton.png")));
+            startButtonDark = ImageIO.read(Objects.requireNonNull(getClass().getResource("/startbuttondark.png")));
             playButtonBounds = new Rectangle(357, 315, 154*2, 48*2);
             startButtonBounds = new Rectangle(357, 550, 154*2, 48*2);
             setFocusable(true);
@@ -127,6 +127,21 @@ public class GamePanel extends JPanel implements Runnable{
                     (Player.gameState == GameState.IDLE && startButtonBounds.contains( e.getPoint() ))){
                         isMousePressedOnPlayButton = true;
 
+                    } else if (Player.gameState == GameState.FRYING) {
+                        if(SwingUtilities.isLeftMouseButton(e)){
+                            keyGame.currentClick = "L";
+                        }
+                        else if (SwingUtilities.isRightMouseButton(e))keyGame.currentClick = "R";
+
+                        if(Objects.equals(keyGame.currentList.get(keyGame.currentClickIndex).click, keyGame.currentClick)){
+                            keyGame.currentList.set(keyGame.currentClickIndex,
+                                    (Objects.equals(keyGame.currentClick, "L") ? keyGame.lmbPressed : keyGame.rmbPressed));
+                            keyGame.currentClickIndex++;
+
+                            if(keyGame.currentClickIndex >= keyGame.currentList.size()){
+                                keyGame.currentClickIndex = 0;
+                            }
+                        }
                     }
                 }
 
@@ -201,7 +216,7 @@ public class GamePanel extends JPanel implements Runnable{
             try{
                 Thread.sleep(Constants.FPS_CAP);
             } catch (Exception e) {
-
+                throw new RuntimeException(e);
             }
 
 
@@ -249,9 +264,15 @@ public class GamePanel extends JPanel implements Runnable{
                 break;
 
             case FRYING:
-
+                keyGame.timerBar.update(dt);
                 fade.transparent(0.05f);
-
+                if(!keyGame.comboGen) {
+                    keyGame.currentList = keyGame.getRandomCombo(5);
+                    keyGame.comboGen = true;
+                }
+                if(keyGame.startX != keyGame.moveX && fade.alphaValue <=0){
+                    keyGame.pop(dt);
+                }
 
                 break;
 
@@ -301,7 +322,7 @@ public class GamePanel extends JPanel implements Runnable{
                 materials.drawChopping(g, deltaTime);
                 player.drawBack(g, deltaTime);
                 materials.drawChoppingVegetable(g);
-                typeGame.draw(g, currentFrame);
+                typeGame.draw(g, materials.currentFrame);
                 fade.draw(g);
                 break;
 
@@ -312,6 +333,8 @@ public class GamePanel extends JPanel implements Runnable{
                 gF.setColor(overlayF);
                 gF.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
                 materials.drawFrying(g, deltaTime, fade.alphaValue);
+                keyGame.draw(g, keyGame.currentList, materials.currentFrame);
+
                 fade.draw(g);
                 break;
 

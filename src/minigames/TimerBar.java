@@ -13,17 +13,24 @@ public class TimerBar extends JProgressBar {
 
     BufferedImage barFill;
     public double progressVal = 100;
-    double durationSec;
-
-    public TimerBar(String filepath, double durationSec){
+    double durationSec, scale;
+    int width, height, x, y;
+    public TimerBar(String filepath, double durationSec, double scale){
         super(0,100);
         setOpaque(false);
         this.durationSec = durationSec;
+
+
         try {
             barFill = ImageIO.read(Objects.requireNonNull(getClass().getResource(filepath)));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        this.scale = scale;
+        width = (int) (barFill.getWidth()*scale);
+        height = (int)(barFill.getHeight() * scale);
+        x = Constants.TIMERX;
+        y = Constants.TIMERY;
     }
 
     public void update(double dt){
@@ -41,13 +48,13 @@ public class TimerBar extends JProgressBar {
 
         Graphics2D g2 = (Graphics2D) g;
 
-        int fillWidth = (int) ((getPercentComplete()) * barFill.getWidth()*Constants.SCALE);
-        int scaledHeight = barFill.getHeight() * Constants.SCALE;
+        int fillWidth = (int) ((getPercentComplete()) * width);
+        int scaledHeight = height;
 
         Shape oldClip = g2.getClip();
-        g2.clipRect(Constants.TIMERX,Constants.TIMERY,fillWidth, scaledHeight);
+        g2.clipRect(x,y,fillWidth, scaledHeight);
 
-        g2.drawImage(barFill,Constants.TIMERX,Constants.TIMERY, barFill.getWidth() * Constants.SCALE, scaledHeight, null);
+        g2.drawImage(barFill,x,y, (int)(width), height, null);
         g2.setClip(oldClip);
         
         

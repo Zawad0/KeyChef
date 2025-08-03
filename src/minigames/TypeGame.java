@@ -1,10 +1,6 @@
 package minigames;
-
 import main.*;
-import entity.*;
-
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -18,7 +14,7 @@ public class TypeGame {
     public Map<String, List<BufferedImage>>currentWords;
     public WordBank words = new WordBank("words_alpha_common.txt");
     public Keys keys = new Keys();
-    public TimerBar timerBar = new TimerBar("/progress_bar.png",5);
+    public TimerBar timerBar = new TimerBar("/progress_bar.png",5, Constants.SCALE);
 
     public List<String>currentWordsList;
     public int currentWordIndex = 0;
@@ -28,9 +24,6 @@ public class TypeGame {
     BufferedImage barFrame;
     SpriteSheet clock;
 
-    int totalTime = 5000;
-    long startTime;
-    boolean timerStart = false;
 
     public TypeGame(){
 
