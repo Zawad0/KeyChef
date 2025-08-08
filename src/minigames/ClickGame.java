@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
-public class KeyGame{
+public class ClickGame {
 
     BufferedImage board;
     public BufferedImage lmb, rmb, lmb_press, rmb_press;
@@ -27,20 +27,20 @@ public class KeyGame{
     public Pair lmbPressed, rmbPressed;
     BufferedImage barFrame;
     SpriteSheet clock;
-    public TimerBar timerBar = new TimerBar("/progress_bar.png",7, 0.5);
+    public TimerBar timerBar = new TimerBar("/ui/progress_bar.png",7, 0.5);
 
     public boolean comboGen;
-    public KeyGame(){
+    public ClickGame(){
         try {
-            board = ImageIO.read(Objects.requireNonNull(getClass().getResource("/keygameboard.png")));
-            lmb = ImageIO.read(Objects.requireNonNull(getClass().getResource("/lmb.png")));
-            rmb = ImageIO.read(Objects.requireNonNull(getClass().getResource("/rmb.png")));
-            lmb_press = ImageIO.read(Objects.requireNonNull(getClass().getResource("/lmb_pressed.png")));
-            rmb_press =ImageIO.read(Objects.requireNonNull(getClass().getResource("/rmb_pressed.png")));
+            board = ImageIO.read(Objects.requireNonNull(getClass().getResource("/frying/clickgameboard.png")));
+            lmb = ImageIO.read(Objects.requireNonNull(getClass().getResource("/keys/Mouse/lmb.png")));
+            rmb = ImageIO.read(Objects.requireNonNull(getClass().getResource("/keys/Mouse/rmb.png")));
+            lmb_press = ImageIO.read(Objects.requireNonNull(getClass().getResource("/keys/Mouse/lmb_pressed.png")));
+            rmb_press =ImageIO.read(Objects.requireNonNull(getClass().getResource("/keys/Mouse/rmb_pressed.png")));
             lmbPressed = new Pair("L", lmb_press);
             rmbPressed = new Pair("R", rmb_press);
-            clock = new SpriteSheet("/clock.png", 32);
-            barFrame = ImageIO.read(Objects.requireNonNull(getClass().getResource("/bar.png")));
+            clock = new SpriteSheet("/ui/clock.png", 32);
+            barFrame = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/bar.png")));
             timerBar.width = (int) (timerBar.barFill.getWidth());
             timerBar.height = (int) (timerBar.barFill.getHeight());
             timerBar.x = 5;

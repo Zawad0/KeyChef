@@ -11,7 +11,7 @@ public class Main {
         window.setTitle("Key Chef");
 
         GamePanel gamePanel = new GamePanel();
-
+        window.setIconImage(gamePanel.icon);
         window.add(gamePanel);
         window.pack();
 

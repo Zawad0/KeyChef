@@ -2,7 +2,8 @@ package main;
 
 import entity.Materials;
 import entity.Player;
-import minigames.KeyGame;
+import minigames.ClickGame;
+import minigames.TimeGame;
 import minigames.TypeGame;
 
 import javax.imageio.ImageIO;
@@ -28,13 +29,15 @@ public class GamePanel extends JPanel implements Runnable{
     BufferedImage playButtonDark;
     BufferedImage startButton;
     BufferedImage startButtonDark;
+    BufferedImage icon;
 
     Rectangle playButtonBounds;
     Rectangle startButtonBounds;
     Player player = new Player();
 
     Materials materials;
-    KeyGame keyGame = new KeyGame();
+    ClickGame clickGame = new ClickGame();
+    TimeGame timeGame = new TimeGame();
 
 
     UI ui = new UI();
@@ -62,14 +65,15 @@ public class GamePanel extends JPanel implements Runnable{
         try {
             typeGame.words.printWords();
             materials = new Materials(this);
+            icon = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/icon.png")));
             background = ImageIO.read(Objects.requireNonNull(getClass().getResource("/kitchen.png")));
-            backgroundMenu = ImageIO.read(Objects.requireNonNull(getClass().getResource("/Sprite-menuBoardless.png")));
-            menuBoard = ImageIO.read(Objects.requireNonNull(getClass().getResource("/Sprite-board.png")));
+            backgroundMenu = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/Sprite-menuBoardless.png")));
+            menuBoard = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/Sprite-board.png")));
             System.out.println("Width "+menuBoard.getWidth()+" Height "+menuBoard.getHeight());
-            playButton = ImageIO.read(Objects.requireNonNull(getClass().getResource("/playbutton.png")));
-            playButtonDark = ImageIO.read(Objects.requireNonNull(getClass().getResource("/playbuttondark.png")));
-            startButton = ImageIO.read(Objects.requireNonNull(getClass().getResource("/startbutton.png")));
-            startButtonDark = ImageIO.read(Objects.requireNonNull(getClass().getResource("/startbuttondark.png")));
+            playButton = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/playbutton.png")));
+            playButtonDark = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/playbuttondark.png")));
+            startButton = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/startbutton.png")));
+            startButtonDark = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/startbuttondark.png")));
             playButtonBounds = new Rectangle(357, 315, 154*2, 48*2);
             startButtonBounds = new Rectangle(357, 550, 154*2, 48*2);
             setFocusable(true);
@@ -83,35 +87,33 @@ public class GamePanel extends JPanel implements Runnable{
 
                 @Override
                 public void keyPressed(KeyEvent e) {
-//                    if(Player.gameState == GameState.CHOPPING && e.getKeyCode() == KeyEvent.VK_SPACE){
-//                        resetAnimation();
-//                        fade.reset(1f);
-//                        Player.gameState = GameState.FRYING;
-//
-//                    }
+                    if(Player.gameState == GameState.CHOPPING){
+                        char pressed = Character.toUpperCase(e.getKeyChar());
+                        String currentWord = typeGame.currentWordsList.get(typeGame.currentWordIndex);
+                        char currentChar = currentWord.charAt(typeGame.currentCharIndex);
+                        if(pressed == currentChar){
 
-                    char pressed = Character.toUpperCase(e.getKeyChar());
-                    String currentWord = typeGame.currentWordsList.get(typeGame.currentWordIndex);
-                    char currentChar = currentWord.charAt(typeGame.currentCharIndex);
-                    if(pressed == currentChar){
+                            List<BufferedImage> spriteList = typeGame.currentWords.get(currentWord);
+                            spriteList.set(typeGame.currentCharIndex, typeGame.keys.getPr(String.valueOf(currentChar)));
 
-                        List<BufferedImage> spriteList = typeGame.currentWords.get(currentWord);
-                        spriteList.set(typeGame.currentCharIndex, typeGame.keys.getPr(String.valueOf(currentChar)));
+                            typeGame.currentCharIndex++;
 
-                        typeGame.currentCharIndex++;
+                            if(typeGame.currentCharIndex >= currentWord.length()){
+                                typeGame.currentCharIndex = 0;
+                                typeGame.currentWordIndex++;
 
-                        if(typeGame.currentCharIndex >= currentWord.length()){
-                            typeGame.currentCharIndex = 0;
-                            typeGame.currentWordIndex++;
-
-                            if(typeGame.currentWordIndex>=typeGame.currentWordsList.size()){
-                                materials.reset();
-                                player.reset();
-                                fade.reset(2f);
-                                Player.gameState = GameState.FRYING;
+                                if(typeGame.currentWordIndex>=typeGame.currentWordsList.size()){
+                                    materials.reset();
+                                    player.reset();
+                                    fade.reset();
+                                    Player.gameState = GameState.FRYING;
+                                }
                             }
                         }
+
                     }
+
+
                 }
 
                 @Override
@@ -129,17 +131,23 @@ public class GamePanel extends JPanel implements Runnable{
 
                     } else if (Player.gameState == GameState.FRYING) {
                         if(SwingUtilities.isLeftMouseButton(e)){
-                            keyGame.currentClick = "L";
+                            clickGame.currentClick = "L";
                         }
-                        else if (SwingUtilities.isRightMouseButton(e))keyGame.currentClick = "R";
+                        else if (SwingUtilities.isRightMouseButton(e)) clickGame.currentClick = "R";
 
-                        if(Objects.equals(keyGame.currentList.get(keyGame.currentClickIndex).click, keyGame.currentClick)){
-                            keyGame.currentList.set(keyGame.currentClickIndex,
-                                    (Objects.equals(keyGame.currentClick, "L") ? keyGame.lmbPressed : keyGame.rmbPressed));
-                            keyGame.currentClickIndex++;
+                        if(Objects.equals(clickGame.currentList.get(clickGame.currentClickIndex).click, clickGame.currentClick)){
+                            clickGame.currentList.set(clickGame.currentClickIndex,
+                                    (Objects.equals(clickGame.currentClick, "L") ? clickGame.lmbPressed : clickGame.rmbPressed));
+                            clickGame.currentClickIndex++;
 
-                            if(keyGame.currentClickIndex >= keyGame.currentList.size()){
-                                keyGame.currentClickIndex = 0;
+                            if(clickGame.currentClickIndex >= clickGame.currentList.size()){
+                                clickGame.currentClickIndex = 0;
+
+                                fade.reset();
+                                materials.reset();
+                                player.reset();
+                                Player.gameState = GameState.ASSEMBLE;
+                                System.out.println(Player.gameState);
                             }
                         }
                     }
@@ -170,8 +178,23 @@ public class GamePanel extends JPanel implements Runnable{
 
                     if(Player.gameState == GameState.IDLE && startButtonBounds.contains(e.getPoint())){
                         wasStartPressed = true;
-                        fade.reset(1f);
+                        fade.reset();
 
+                    }
+
+                    if(Player.gameState == GameState.ASSEMBLE){
+
+                        if(timeGame.currentIndex < timeGame.ingredients.size()){
+
+                            timeGame.finalX.add((int)(timeGame.x));
+                            timeGame.ingredients.get(timeGame.currentIndex).bool = true;
+                            timeGame.currentIndex++;
+//                            if(timeGame.currentIndex >= 9){
+//                                timeGame.currentIndex = 8;
+//                            }
+
+
+                        }
                     }
 
                     isMousePressedOnPlayButton = false;
@@ -214,7 +237,7 @@ public class GamePanel extends JPanel implements Runnable{
             repaint();
 
             try{
-                Thread.sleep(Constants.FPS_CAP);
+                Thread.sleep(1000/Constants.FPS_CAP);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -231,7 +254,7 @@ public class GamePanel extends JPanel implements Runnable{
         stateUpdater(dt);
         ui.type(dt);
         if(wasStartPressed){
-            fade.reset(1f);
+            fade.reset();
             materials.reset();
             player.reset();
             Player.gameState = GameState.CHOPPING;
@@ -256,6 +279,9 @@ public class GamePanel extends JPanel implements Runnable{
                     typeGame.currentWordsList = new ArrayList<>(typeGame.currentWords.keySet());
                     typeGame.areWordsShown = true;
                 }
+                if(typeGame.timerBar.progressVal == 0){
+                    Player.gameState = GameState.FRYING;
+                }
 
 
                 fade.transparent(0.024f);
@@ -264,15 +290,21 @@ public class GamePanel extends JPanel implements Runnable{
                 break;
 
             case FRYING:
-                keyGame.timerBar.update(dt);
+                clickGame.timerBar.update(dt);
                 fade.transparent(0.05f);
-                if(!keyGame.comboGen) {
-                    keyGame.currentList = keyGame.getRandomCombo(5);
-                    keyGame.comboGen = true;
+                if(!clickGame.comboGen) {
+                    clickGame.currentList = clickGame.getRandomCombo(5);
+                    clickGame.comboGen = true;
                 }
-                if(keyGame.startX != keyGame.moveX && fade.alphaValue <=0){
-                    keyGame.pop(dt);
+                if(clickGame.startX != clickGame.moveX && fade.alphaValue <=0){
+                    clickGame.pop(dt);
                 }
+
+                break;
+
+            case ASSEMBLE:
+                fade.transparent(0.05f);
+                if(timeGame.currentIndex<timeGame.ingredients.size()) timeGame.itemSwing(dt);
 
                 break;
 
@@ -333,8 +365,18 @@ public class GamePanel extends JPanel implements Runnable{
                 gF.setColor(overlayF);
                 gF.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
                 materials.drawFrying(g, deltaTime, fade.alphaValue);
-                keyGame.draw(g, keyGame.currentList, materials.currentFrame);
+                clickGame.draw(g, clickGame.currentList, materials.currentFrame);
 
+                fade.draw(g);
+                break;
+
+            case ASSEMBLE:
+                Graphics2D gA = (Graphics2D) g;
+                g.drawImage(background, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT, null);
+                Color overlayA = new Color(0, 0,0, 190);
+                gA.setColor(overlayA);
+                gA.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+                timeGame.draw(g);
                 fade.draw(g);
                 break;
 

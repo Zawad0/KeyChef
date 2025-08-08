@@ -20,14 +20,14 @@ public class Player {
 
 
     //public GameState gameState = GameState.CHOPPING;
-    public static GameState gameState =  GameState.FRYING;
+    public static GameState gameState =  GameState.CHOPPING;
 
     public Player(){
         {
             try {
-                playerSpriteBack = new SpriteSheet("/Sprite-charaback3.png", 32);
-                playerSpriteFrontMenu = new SpriteSheet("/Sprite-charafront.png", 32);
-                playerSpriteFrontTalk = new SpriteSheet("/Sprite-charafront_talk.png", 32);
+                playerSpriteBack = new SpriteSheet("/character/Sprite-charaback3.png", 32);
+                playerSpriteFrontMenu = new SpriteSheet("/character/Sprite-charafront.png", 32);
+                playerSpriteFrontTalk = new SpriteSheet("/character/Sprite-charafront_talk.png", 32);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

@@ -6,7 +6,6 @@ import entity.Player;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.Objects;
 
 
@@ -27,8 +26,8 @@ public class UI{
         try {
 
             pixelFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().
-                    getResourceAsStream("/PixelifySans-VariableFont_wght.ttf")));
-            dialogue = ImageIO.read(Objects.requireNonNull(getClass().getResource("/Sprite-Dialogue.png")));
+                    getResourceAsStream("/text/PixelifySans-VariableFont_wght.ttf")));
+            dialogue = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/Sprite-Dialogue.png")));
 
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(pixelFont);
@@ -84,11 +83,11 @@ public class UI{
 
     public void draw(Graphics g){
         if(Player.gameState == GameState.DIALOGUE){
-            drawDialouge(g);
+            drawDialogue(g);
         }
     }
 
-    public void drawDialouge(Graphics g) {
+    public void drawDialogue(Graphics g) {
 
         g.drawImage(dialogue, Constants.DIALOGUE_WINDOWX, Constants.DIALOGUE_WINDOWY, Constants.DIALOGUE_WINDOW_WIDTH, Constants.DIALOGUE_WINDOW_HEIGHT, null);
     }

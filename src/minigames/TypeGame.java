@@ -11,10 +11,10 @@ import java.util.List;
 
 public class TypeGame {
     public boolean areWordsShown = false;
-    public Map<String, List<BufferedImage>>currentWords;
-    public WordBank words = new WordBank("words_alpha_common.txt");
+    public Map<String, List<BufferedImage>>currentWords = new HashMap<>();
+    public WordBank words = new WordBank("text/words_alpha_common.txt");
     public Keys keys = new Keys();
-    public TimerBar timerBar = new TimerBar("/progress_bar.png",5, Constants.SCALE);
+    public TimerBar timerBar = new TimerBar("/ui/progress_bar.png",5, Constants.SCALE);
 
     public List<String>currentWordsList;
     public int currentWordIndex = 0;
@@ -28,9 +28,9 @@ public class TypeGame {
     public TypeGame(){
 
         try {
-            barFrame = ImageIO.read(Objects.requireNonNull(getClass().getResource("/bar.png")));
-            clock = new SpriteSheet("/clock.png",32);
-            barBack = ImageIO.read(Objects.requireNonNull(getClass().getResource("/bar_background.png")));
+            barFrame = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/bar.png")));
+            clock = new SpriteSheet("/ui/clock.png",32);
+            barBack = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/bar_background.png")));
             clock.frameX = 55;
             clock.frameY = 30;
 

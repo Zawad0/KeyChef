@@ -15,16 +15,13 @@ public class Fade extends JPanel {
 
 
     public void transparent(float f){
-        alphaValue -= f;
+        alphaValue = Math.max(0,alphaValue - f);
 
-        if(alphaValue <0){
-            alphaValue = 0;
-        }
 
     }
 
-    public void reset(float f){
-        alphaValue = f;
+    public void reset(){
+        alphaValue = 1f;
     }
 
 

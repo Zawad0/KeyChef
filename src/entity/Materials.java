@@ -25,16 +25,16 @@ public class Materials {
     public Materials(GamePanel gp){
         this.gp = gp;
         try {
-            chopping = new SpriteSheet("/chopping.png", 64);
-            frying = new SpriteSheet("/frying.png", 330);
+            chopping = new SpriteSheet("/chopping/chopping.png", 64);
+            frying = new SpriteSheet("/frying/frying.png", 330);
             frying.frameX = 100;
             frying.frameY = 100;
 
-            choppingTomato = ImageIO.read(Objects.requireNonNull(getClass().getResource("/tomato_slice.png")));
+            choppingTomato = ImageIO.read(Objects.requireNonNull(getClass().getResource("/chopping/tomato_slice.png")));
 
-            choppingOnion = ImageIO.read(Objects.requireNonNull(getClass().getResource("/onion_slice.png")));
+            choppingOnion = ImageIO.read(Objects.requireNonNull(getClass().getResource("/chopping/onion_slice.png")));
 
-            choppingCucumber = ImageIO.read(Objects.requireNonNull(getClass().getResource("/cucumber_slice.png")));
+            choppingCucumber = ImageIO.read(Objects.requireNonNull(getClass().getResource("/chopping/cucumber_slice.png")));
 
         } catch (Exception e) {
             throw new RuntimeException(e);
