@@ -6,8 +6,10 @@ import minigames.ClickGame;
 import minigames.Countdown;
 import minigames.TimeGame;
 import minigames.TypeGame;
-
 import javax.imageio.ImageIO;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -31,6 +33,8 @@ public class GamePanel extends JPanel implements Runnable{
     BufferedImage startButton;
     BufferedImage startButtonDark;
     BufferedImage icon;
+    SpriteSheet menuSmoke;
+    Sound sound;
 
     Rectangle playButtonBounds;
     Rectangle startButtonBounds;
@@ -56,30 +60,41 @@ public class GamePanel extends JPanel implements Runnable{
     public static int burgerCount = 0;
     public static int score = 0;
     public static int highscore = 0;
+    public static int hearts = 3;
+    public int diffModif = 1;
 
+    GameState previousGameState = null;
+    Clip currentBackgroundMusic = null;
+
+    double animationTimer = 0;
+    int currentFrame = 0;
     TypeGame typeGame = new TypeGame();
 
 
 
 
-    GamePanel(){
+    GamePanel() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         setPreferredSize(new Dimension(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT));
         setBackground(Color.black);
         setDoubleBuffered(true);
         try {
             typeGame.words.printWords();
             materials = new Materials(this);
+            menuSmoke = new SpriteSheet("/menu/menusmoke-Sheet.png",512);
             icon = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/icon.png")));
             background = ImageIO.read(Objects.requireNonNull(getClass().getResource("/kitchen.png")));
-            backgroundMenu = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/Sprite-menuBoardless.png")));
-            menuBoard = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/Sprite-board.png")));
+            backgroundMenu = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/menubg.png")));
+            menuBoard = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/menuboard.png")));
             System.out.println("Width "+menuBoard.getWidth()+" Height "+menuBoard.getHeight());
             playButton = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/playbutton.png")));
             playButtonDark = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/playbuttondark.png")));
             startButton = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/startbutton.png")));
             startButtonDark = ImageIO.read(Objects.requireNonNull(getClass().getResource("/menu/startbuttondark.png")));
+            sound = new Sound();
             playButtonBounds = new Rectangle(357, 315, 154*2, 48*2);
             startButtonBounds = new Rectangle(357, 550, 154*2, 48*2);
+            typeGame.timerBar.durationSec = 10;
+            clickGame.timerBar.durationSec = 8;
             setFocusable(true);
             requestFocusInWindow();
 
@@ -107,16 +122,25 @@ public class GamePanel extends JPanel implements Runnable{
                                 typeGame.currentWordIndex++;
 
                                 if(typeGame.currentWordIndex>=typeGame.currentWordsList.size()){
-                                    materials.reset();
-                                    player.reset();
-                                    fade.reset();
-                                    countdown.reset();
+                                    reset();
+                                    clickGame.timerBar.progressVal = 100;
                                     score+=100;
                                     Player.gameState = GameState.FRYING;
                                 }
                             }
                         }
+                        else{
+                            hearts--;
+                            ui.dmgHeart();
+                        }
 
+                    }
+
+                    else if(Player.gameState == GameState.GAMEOVER){
+                        if(e.getKeyChar() == KeyEvent.VK_SPACE){
+                            reset();
+                            Player.gameState = GameState.IDLE;
+                        }
                     }
 
 
@@ -134,6 +158,7 @@ public class GamePanel extends JPanel implements Runnable{
                     if( (Player.gameState == GameState.MENU && playButtonBounds.contains( e.getPoint() )) ||
                     (Player.gameState == GameState.IDLE && startButtonBounds.contains( e.getPoint() ))){
                         isMousePressedOnPlayButton = true;
+                        sound.play(sound.select, false);
 
                     }
                 }
@@ -153,8 +178,7 @@ public class GamePanel extends JPanel implements Runnable{
                             ui.typingOut = false;
                         }
                         if(ui.textIndex > 8){
-                            player.reset();
-                            materials.reset();
+                            reset();
                             Player.gameState = GameState.IDLE;
                         }
 
@@ -165,14 +189,20 @@ public class GamePanel extends JPanel implements Runnable{
                         wasStartPressed = true;
                         fade.reset();
 
+
                     }
 
                     if(Player.gameState == GameState.ASSEMBLE && fade.alphaValue <= 0){
 
                         if(timeGame.currentIndex < timeGame.ingredients.size()){
 
-                            timeGame.finalX.add((int)(timeGame.x));
-                            timeGame.movedFinalX.add(timeGame.finalX.getLast()-175);
+                            if(timeGame.x <=-30 || timeGame.x >= 420){
+                                hearts--;
+                                ui.dmgHeart();
+                            }
+                            System.out.println(hearts);
+                            timeGame.finalX.add(new TimeGame.Pair( ((int)(timeGame.x)), false));
+
                             timeGame.ingredients.get(timeGame.currentIndex).bool = true;
                             timeGame.currentIndex++;
                             if(timeGame.currentIndex == timeGame.ingredients.size()){
@@ -181,6 +211,7 @@ public class GamePanel extends JPanel implements Runnable{
 
 
                         }
+
                     }
 
 
@@ -191,21 +222,24 @@ public class GamePanel extends JPanel implements Runnable{
                         else if (SwingUtilities.isRightMouseButton(e)) clickGame.currentClick = "R";
 
                         if(Objects.equals(clickGame.currentList.get(clickGame.currentClickIndex).click, clickGame.currentClick)){
-                            clickGame.currentList.set(clickGame.currentClickIndex,
-                                    (Objects.equals(clickGame.currentClick, "L") ? clickGame.lmbPressed : clickGame.rmbPressed));
+
+                            ClickGame.Pair pressedPair = (Objects.equals(clickGame.currentClick, "L") ? clickGame.lmbPressed : clickGame.rmbPressed);
+                            clickGame.currentList.set(clickGame.currentClickIndex, new ClickGame.Pair(pressedPair.click, pressedPair.image));
+
                             clickGame.currentClickIndex++;
 
                             if(clickGame.currentClickIndex >= clickGame.currentList.size()){
                                 clickGame.currentClickIndex = 0;
 
-                                fade.reset();
-                                materials.reset();
-                                player.reset();
-                                countdown.reset();
+                                reset();
                                 score+=100;
                                 Player.gameState = GameState.ASSEMBLE;
                                 System.out.println(Player.gameState);
                             }
+                        }
+                        else{
+                            hearts--;
+                            ui.dmgHeart();
                         }
                     }
 
@@ -265,13 +299,13 @@ public class GamePanel extends JPanel implements Runnable{
 //        System.out.println(String.format("%.2f", 1/dt) + "fps"); //Shows FPS in logs
 
         stateUpdater(dt);
+        updateBgm(Player.gameState);
+        ui.heartManage();
+        if(hearts<=0) Player.gameState=GameState.GAMEOVER;
         ui.type(dt);
         if(wasStartPressed){
-            fade.reset();
-            materials.reset();
-            player.reset();
+            reset();
             Player.gameState = GameState.CHOPPING;
-            wasStartPressed = false;
         }
 
         if(typeGame.timerBar.progressVal <= 0){
@@ -285,15 +319,16 @@ public class GamePanel extends JPanel implements Runnable{
     void stateUpdater(double dt){
         switch (Player.gameState) {
             case CHOPPING:
-                if(countdown.second >= 3){
+                if(countdown.isComplete){
                     typeGame.timerBar.update(dt);
                     if(!typeGame.areWordsShown){
-                        typeGame.currentWords = typeGame.getMap(5);
-                        typeGame.currentWordsList = new ArrayList<>(typeGame.currentWords.keySet());
-                        typeGame.areWordsShown = true;
+                        difficulty();
+
                     }
                     if(typeGame.timerBar.progressVal == 0){
-                        //-1 hp
+                        hearts--;
+                        ui.dmgHeart();
+                        typeGame.timerBar.progressVal = 100;
                     }
 
 
@@ -309,14 +344,18 @@ public class GamePanel extends JPanel implements Runnable{
                 if(fade.alphaValue <= 0){
                     clickGame.timerBar.update(dt);
                 }
-                    fade.transparent(0.0099f);
-                    if(!clickGame.comboGen) {
-                        clickGame.currentList = clickGame.getRandomCombo(5);
-                        clickGame.comboGen = true;
-                    }
-                    if(clickGame.startX != clickGame.moveX && fade.alphaValue <=0){
-                        clickGame.pop(dt);
-                    }
+                fade.transparent(0.0099f);
+                if(!clickGame.comboGen) {
+                  difficulty();
+                }
+                if(clickGame.startX != clickGame.moveX && fade.alphaValue <=0){
+                    clickGame.pop(dt);
+                }
+                if(clickGame.timerBar.progressVal == 0){
+                    hearts--;
+                    ui.dmgHeart();
+                    clickGame.timerBar.progressVal = 100;
+                }
 
 
 
@@ -326,7 +365,8 @@ public class GamePanel extends JPanel implements Runnable{
                 fade.transparent(0.0099f);
                 if(fade.alphaValue <= 0){
 
-                    if(timeGame.currentIndex<timeGame.ingredients.size()) timeGame.itemSwing(dt, fade.alphaValue);
+                    if(timeGame.currentIndex<timeGame.ingredients.size())
+                        difficulty();
                     else{
                         timeGame.movePlate(dt);
                     }
@@ -337,19 +377,38 @@ public class GamePanel extends JPanel implements Runnable{
 
             case MENU:
 
+                animationTimer+=dt;
+                if (animationTimer >= .2) {
+
+                    animationTimer = 0;
+                    currentFrame++;
+                    if (currentFrame >= menuSmoke.getFrameCount()) {
+                        currentFrame = 0;
+                    }
+                }
+
 
                 if(wasMousePressed){
                     delayTimer+=dt;
 
                     if(delayTimer >= 1.2){
-                        player.reset();
-                        materials.reset();
+                        reset();
                         Player.gameState = GameState.DIALOGUE;
-                        wasMousePressed = false;
-                        delayTimer = 0;
+
                     }
                 }
                 break;
+
+            case IDLE:
+                animationTimer+=dt;
+                if (animationTimer >= .2) {
+
+                    animationTimer = 0;
+                    currentFrame++;
+                    if (currentFrame >= menuSmoke.getFrameCount()) {
+                        currentFrame = 0;
+                    }
+                }
 
             case DIALOGUE:
                 fade.transparent(0.009f);
@@ -365,6 +424,14 @@ public class GamePanel extends JPanel implements Runnable{
                 break;
 
             case SERVE:
+                if(score>highscore) highscore = score;
+                if(gameOver.duration <= 0 && !gameOver.showEnd){
+                    reset();
+                    burgerCount++;
+                    Player.gameState = GameState.CHOPPING;
+                }
+                break;
+
 
 
 
@@ -372,6 +439,144 @@ public class GamePanel extends JPanel implements Runnable{
         }
 
 
+    }
+
+    void updateBgm(GameState currentState){
+        Clip newMusic = null;
+
+
+            switch (currentState){
+                case MENU:
+                    newMusic = sound.menuTheme;
+                    break;
+
+                case DIALOGUE:
+                    newMusic = sound.yapyapTheme;
+                    break;
+
+                case IDLE:
+                    newMusic = sound.idleTheme;
+                    break;
+
+                case CHOPPING:
+                case FRYING:
+                case ASSEMBLE:
+                    newMusic = sound.gameTheme;
+                    break;
+
+                case SERVE:
+                    newMusic = currentBackgroundMusic;
+                    break;
+
+                case GAMEOVER:
+                    newMusic = sound.gameOverTheme;
+                    break;
+            }
+
+
+            if (newMusic != null && newMusic != currentBackgroundMusic) {
+                if (currentBackgroundMusic != null) {
+                    sound.stop(currentBackgroundMusic);
+                }
+                currentBackgroundMusic = newMusic;
+                sound.play(currentBackgroundMusic, true);
+                if(currentState == GameState.GAMEOVER)sound.play(sound.lose,false);
+            }
+
+            previousGameState = currentState;
+
+
+        }
+
+
+    void difficulty(){
+        System.out.println(burgerCount+"   "+diffModif);
+        diffModif = Math.min(4, burgerCount/3);
+        switch (Player.gameState){
+
+            case CHOPPING:
+                typeGame.currentWords = typeGame.getMap(2+diffModif);
+                typeGame.currentWordsList = new ArrayList<>(typeGame.currentWords.keySet());
+                typeGame.areWordsShown = true;
+                typeGame.timerBar.durationSec -= (0.5*diffModif);
+                break;
+
+            case FRYING:
+                clickGame.currentList = clickGame.getRandomCombo(3+diffModif);
+                clickGame.comboGen = true;
+                clickGame.timerBar.durationSec -= (0.5*diffModif);
+                break;
+
+            case ASSEMBLE:
+                timeGame.itemSwing(4+diffModif,deltaTime, fade.alphaValue);
+                break;
+
+        }
+    }
+    void reset(){
+
+        switch (Player.gameState){
+
+            case IDLE:
+                fade.reset();
+                materials.reset();
+                player.reset();
+                wasStartPressed = false;
+
+                break;
+
+            case MENU:
+                player.reset();
+                materials.reset();
+                wasMousePressed = false;
+                delayTimer = 0;
+
+                break;
+
+            case CHOPPING:
+                materials.reset();
+                player.reset();
+                fade.reset();
+                countdown.reset();
+                typeGame.reset();
+
+
+                break;
+
+            case FRYING:
+                fade.reset();
+                materials.reset();
+                player.reset();
+                countdown.reset();
+                clickGame.reset();
+
+                break;
+
+            case SERVE:
+
+                gameOver.reset();
+                break;
+
+            case GAMEOVER:
+                fade.reset();
+                materials.reset();
+                player.reset();
+                wasStartPressed = false;
+                gameOver.reset();
+                countdown.reset();
+                clickGame.reset();
+                typeGame.reset();
+                timeGame.reset();
+                wasMousePressed = false;
+                delayTimer = 0;
+                hearts = 3;
+                score = 0;
+                diffModif = 1;
+
+                typeGame.timerBar.durationSec = 10;
+                clickGame.timerBar.durationSec = 7;
+
+        }
     }
 
     public void paintComponent(Graphics g){
@@ -386,7 +591,7 @@ public class GamePanel extends JPanel implements Runnable{
                 gC.setColor(overlayC);
                 gC.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
                 materials.drawChopping(g, deltaTime);
-                if(countdown.second < 3){
+                if(!countdown.isComplete){
                     gC.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
                     countdown.draw(g, deltaTime);
                 }
@@ -396,6 +601,7 @@ public class GamePanel extends JPanel implements Runnable{
                     //materials.drawChoppingVegetable(g);
                     typeGame.draw(g, materials.currentFrame);
                     ui.drawScore(g);
+                    ui.drawHearts(g, deltaTime);
                     fade.draw(g);
                 }
 
@@ -411,6 +617,7 @@ public class GamePanel extends JPanel implements Runnable{
                 materials.drawFrying(g, deltaTime, fade.alphaValue);
                 clickGame.draw(g, clickGame.currentList, materials.currentFrame);
                 ui.drawScore(g);
+                ui.drawHearts(g, deltaTime);
                 fade.draw(g);
                 break;
 
@@ -422,6 +629,7 @@ public class GamePanel extends JPanel implements Runnable{
                 gA.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
                 timeGame.draw(g);
                 ui.drawScore(g);
+                ui.drawHearts(g, deltaTime);
                 fade.draw(g);
                 break;
 
@@ -437,6 +645,8 @@ public class GamePanel extends JPanel implements Runnable{
                 else{
                     g.drawImage(playButton, playButtonBounds.x, playButtonBounds.y, playButtonBounds.width, playButtonBounds.height, null);
                 }
+                BufferedImage smokeFrame = menuSmoke.getFrame(currentFrame);
+                g.drawImage(smokeFrame,0,0,smokeFrame.getWidth()*Constants.SCALE, smokeFrame.getHeight()*Constants.SCALE, null);
 
 
                 break;
@@ -463,28 +673,63 @@ public class GamePanel extends JPanel implements Runnable{
 
             case IDLE:
                 g.drawImage(background,0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT, null);
-                g.drawImage(startButton, startButtonBounds.x, startButtonBounds.y, startButtonBounds.width, startButtonBounds.height, null);
-                g.setColor(Color.BLACK);
-                g.fillRect(0,0,Constants.SCREEN_WIDTH, 80);
-                g.fillRect(0, Constants.SCREEN_HEIGHT-80,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+
+
+
                 materials.drawChoppingIdle(g, deltaTime);
                 materials.drawChoppingVegetableIdle(g);
                 materials.drawFryingIdle(g, deltaTime);
+                BufferedImage smokeFrameIdle = menuSmoke.getFrame(currentFrame);
+                g.drawImage(smokeFrameIdle,590,15,smokeFrameIdle.getWidth(), smokeFrameIdle.getHeight(), null);
                 player.drawBackIdle(g, deltaTime);
+
+                Graphics2D gI = (Graphics2D) g;
+                Color overlayI = new Color(0, 0,0, 210);
+                gI.setColor(overlayI);
+                gI.fillRect(0,startButtonBounds.y-10,Constants.SCREEN_WIDTH,startButtonBounds.height+15 );
+
+                g.drawImage(startButton, startButtonBounds.x, startButtonBounds.y, startButtonBounds.width, startButtonBounds.height, null);
                 if(isMousePressedOnPlayButton){
                     Graphics2D g3 = (Graphics2D) g.create();
                     g3.drawImage(startButtonDark, startButtonBounds.x, startButtonBounds.y, startButtonBounds.width, startButtonBounds.height, null);
 
 
                 }
+                g.setColor(Color.BLACK);
+                g.fillRect(0,0,Constants.SCREEN_WIDTH, 80);
+                g.fillRect(0, Constants.SCREEN_HEIGHT-80,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+                g.setFont(ui.pixelFont.deriveFont(Font.BOLD, 40f));
+                g.setColor(Color.WHITE);
+                g.drawString("Highscore: "+highscore, 40, 50);
+
+
                 break;
 
             case SERVE:
-                gameOver.served(g);
+
+                gameOver.served(g, deltaTime);
                 break;
 
-            default:
-                g.drawImage(background,0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT, null);
+            case GAMEOVER:
+                Graphics2D gG = (Graphics2D)g;
+                g.setColor(Color.BLACK);
+                g.fillRect(0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT);
+                gG.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+
+                g.setFont(ui.pixelFont.deriveFont(Font.BOLD, 80f));
+                g.setColor(Color.WHITE);
+
+
+                ui.drawCenteredText(g, "GAME OVER", 200, Color.WHITE);
+                g.setFont(ui.pixelFont.deriveFont(Font.BOLD, 40));
+
+                ui.drawCenteredText(g, "SCORE: "+score, 450, Color.WHITE);
+
+                ui.drawCenteredText(g, "HIGHEST SCORE: "+highscore, 500, Color.WHITE);
+
+                ui.drawCenteredText(g,">PRESS SPACE TO CONTINUE<", 600, Color.WHITE);
+
+                ui.drawHearts(g, deltaTime);
                 break;
         }
 

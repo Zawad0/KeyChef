@@ -12,7 +12,7 @@ public class Materials {
 
 
     public SpriteSheet chopping, choppingIdle;
-    public SpriteSheet frying;
+    public SpriteSheet frying, fryingIdle;
     public BufferedImage choppingTomato;
     public BufferedImage choppingOnion;
     public BufferedImage choppingCucumber;
@@ -28,6 +28,7 @@ public class Materials {
             chopping = new SpriteSheet("/chopping/chopping2.png", 330);
             choppingIdle = new SpriteSheet("/chopping/chopping.png", 64);
             frying = new SpriteSheet("/frying/frying.png", 330);
+            fryingIdle = new SpriteSheet("/frying/frying2.png",330);
             frying.frameX = 100;
             frying.frameY = 100;
 
@@ -86,7 +87,7 @@ public class Materials {
 
 
         BufferedImage applianceFrame = chopping.getFrame(currentFrame);
-        int applianceX = chopping.frameX*Constants.SCALE;
+        int applianceX = (Constants.SCREEN_WIDTH - applianceFrame.getWidth()*Constants.SCALE)/2;
         int applianceY = chopping.frameY*Constants.SCALE;
         int applianceWidth = applianceFrame.getWidth()*Constants.SCALE;
         int applianceHeight = applianceFrame.getHeight()*Constants.SCALE;
@@ -129,7 +130,7 @@ public class Materials {
             }
 
 
-            BufferedImage fryFrame = frying.getFrame(0);
+            BufferedImage fryFrame = fryingIdle.getFrame(0);
             BufferedImage fryFrameCrop = fryFrame.getSubimage(1,1,fryFrame.getWidth()-85,fryFrame.getHeight()-10);
             int fryX = 517;
             int fryY = 210;
@@ -197,7 +198,7 @@ public class Materials {
         }
 
         BufferedImage applianceFrame = frying.getFrame(currentFrame);
-        int applianceX = frying.frameX*Constants.SCALE;
+        int applianceX = (Constants.SCREEN_WIDTH - applianceFrame.getWidth()*Constants.SCALE)/2;
         int applianceY = frying.frameY*Constants.SCALE;
         int applianceWidth = (int) (applianceFrame.getWidth()*Constants.SCALE);
         int applianceHeight = (int) (applianceFrame.getHeight()*Constants.SCALE);
@@ -216,7 +217,7 @@ public class Materials {
             if (animationTimer >= Constants.FRY_FRAME_DURATION) {
                 animationTimer = 0;
                 currentFrame++;
-                if (currentFrame >= frying.getFrameCount()) {
+                if (currentFrame >= fryingIdle.getFrameCount()) {
                     currentFrame = 15;
                 }
             }
@@ -228,7 +229,7 @@ public class Materials {
             }
 
 
-            BufferedImage applianceFrame = frying.getFrame(currentFrame);
+            BufferedImage applianceFrame = fryingIdle.getFrame(currentFrame);
             BufferedImage applianceFrameCrop = applianceFrame.getSubimage(1,1,applianceFrame.getWidth()-85,applianceFrame.getHeight()-10);
             int applianceX = 517;
             int applianceY = 210;

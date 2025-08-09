@@ -58,8 +58,8 @@ public class Constants {
                                 DIALOGUE3 = "Play through 3 minigames and",
                                 DIALOGUE4 = "a burger will be made.",
                                 DIALOGUE5 = "Everytime you finish cooking a burger...",
-                                DIALOGUE6 = "You get 1 point!   But also...",
+                                DIALOGUE6 = "You will get points!   But also...",
                                 DIALOGUE7 = "Make sure to finish before the timer runs out!! ",
-                                DIALOGUE8 = "Goodluck to you chef!";
+                                DIALOGUE8 = "Good luck to you chef!";
 }
 

@@ -13,7 +13,7 @@ public class TimerBar extends JProgressBar {
 
     BufferedImage barFill;
     public double progressVal = 100;
-    double durationSec, scale;
+    public double durationSec, scale;
     int width, height, x, y;
     public TimerBar(String filepath, double durationSec, double scale){
         super(0,100);

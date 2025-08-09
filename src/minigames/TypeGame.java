@@ -19,6 +19,8 @@ public class TypeGame {
     public List<String>currentWordsList;
     public int currentWordIndex = 0;
     public int currentCharIndex = 0;
+    static int space = 45;
+    static int totalWidth;
 
     BufferedImage barBack;
     BufferedImage barFrame;
@@ -40,7 +42,7 @@ public class TypeGame {
 
     }
     public void draw(Graphics g, int currentFrame){
-        int x=70, y=150;
+        int x=(Constants.SCREEN_WIDTH-totalWidth)/2, y=150;
         BufferedImage clockFrame = clock.getFrame(currentFrame);
         int clockScaledWidth = clockFrame.getWidth()*3;
         int clockScaledHeight = clockFrame.getHeight()*3;
@@ -50,7 +52,7 @@ public class TypeGame {
                 g.drawImage(j, x,y, (int) (j.getWidth()*2.2), (int) (j.getHeight()*2.2),null);
                 x+=32;
             }
-            x+=45;
+            x+=space;
         }
         g.drawImage(barBack, Constants.TIMERX, Constants.TIMERY, barFrame.getWidth()*Constants.SCALE,
                 barFrame.getHeight()*Constants.SCALE, null);
@@ -131,13 +133,13 @@ public class TypeGame {
                     Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(filepath))))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    if(line.trim().length()>=4){
+                    if(line.trim().length()>=3){
                         words.add(line.trim());
                     }
 
                 }
             } catch (IOException | NullPointerException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
 
@@ -159,6 +161,7 @@ public class TypeGame {
             do {
                  randomArray = new ArrayList<>();
                 arraySize = 0;
+                totalWidth = -space;
 
                 for(int i=0;i<size;i++){
                     randomArray.add(getRandomWord());
@@ -167,6 +170,8 @@ public class TypeGame {
                     arraySize += word.length();
                 }
             } while (arraySize>23);
+
+            totalWidth += (int) (arraySize*16*2.2);
 
             return randomArray;
         }
@@ -182,6 +187,16 @@ public class TypeGame {
         }
 
         return map;
+    }
+
+    public void reset(){
+         areWordsShown = false;
+         if(currentWords != null)currentWords.clear();
+
+        if(currentWordsList != null)currentWordsList.clear();
+        currentWordIndex = 0;
+        currentCharIndex = 0;
+        timerBar.progressVal = 100;
     }
 
 
