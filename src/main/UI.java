@@ -19,7 +19,8 @@ public class UI{
     public boolean typing = false;
     public int textIndex = 1;
     public boolean typingOut = false;
-    Font pixelFont;
+    public Font pixelFont;
+    public GraphicsEnvironment ge;
 
     UI(){
 
@@ -29,7 +30,7 @@ public class UI{
                     getResourceAsStream("/text/PixelifySans-VariableFont_wght.ttf")));
             dialogue = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/Sprite-Dialogue.png")));
 
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(pixelFont);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -81,10 +82,26 @@ public class UI{
         }
     }
 
-    public void draw(Graphics g){
+    public void drawDiag(Graphics g){
         if(Player.gameState == GameState.DIALOGUE){
             drawDialogue(g);
         }
+    }
+
+    public void drawScore(Graphics g){
+        Graphics2D g2 = (Graphics2D) g;
+
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+
+        g.setFont(pixelFont.deriveFont(Font.BOLD, 23f));
+        g.setColor(Color.WHITE);
+
+        switch (Player.gameState){
+            case ASSEMBLE -> g.drawString("Score: "+(GamePanel.score), 150, 120);
+            case CHOPPING -> g.drawString("Score: "+(GamePanel.score), 210, 250);
+            case FRYING -> g.drawString("Score: "+(GamePanel.score), 20, 100);
+        }
+
     }
 
     public void drawDialogue(Graphics g) {

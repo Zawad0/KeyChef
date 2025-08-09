@@ -11,8 +11,8 @@ public class Constants {
 
     //Chopping phase locations
 
-    public static final int CHOPX = 228;
-    public static final int CHOPY = 153;
+    public static final int CHOPX = 90;
+    public static final int CHOPY = 100;
     public static final int TIMERX = 40;
     public static final int TIMERY = 10;
 

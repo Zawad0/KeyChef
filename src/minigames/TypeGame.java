@@ -40,7 +40,7 @@ public class TypeGame {
 
     }
     public void draw(Graphics g, int currentFrame){
-        int x=70, y=175;
+        int x=70, y=150;
         BufferedImage clockFrame = clock.getFrame(currentFrame);
         int clockScaledWidth = clockFrame.getWidth()*3;
         int clockScaledHeight = clockFrame.getHeight()*3;

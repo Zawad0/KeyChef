@@ -3,6 +3,7 @@ package main;
 import entity.Materials;
 import entity.Player;
 import minigames.ClickGame;
+import minigames.Countdown;
 import minigames.TimeGame;
 import minigames.TypeGame;
 
@@ -41,7 +42,9 @@ public class GamePanel extends JPanel implements Runnable{
 
 
     UI ui = new UI();
+    Countdown countdown = new Countdown();
     Fade fade = new Fade(1f);
+    GameOver gameOver = new GameOver();
 
     //KeyHandler keyHandler = new KeyHandler();
     double deltaTime = 0;
@@ -50,6 +53,9 @@ public class GamePanel extends JPanel implements Runnable{
     double delayTimer = 0;
     boolean wasMousePressed = false;
     boolean wasStartPressed = false;
+    public static int burgerCount = 0;
+    public static int score = 0;
+    public static int highscore = 0;
 
     TypeGame typeGame = new TypeGame();
 
@@ -57,11 +63,9 @@ public class GamePanel extends JPanel implements Runnable{
 
 
     GamePanel(){
-        this.setPreferredSize(new Dimension(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT));
-        this.setBackground(Color.black);
-        this.setDoubleBuffered(true);
-        //this.addKeyListener(keyHandler);
-        //this.setFocusable(true);
+        setPreferredSize(new Dimension(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT));
+        setBackground(Color.black);
+        setDoubleBuffered(true);
         try {
             typeGame.words.printWords();
             materials = new Materials(this);
@@ -106,6 +110,8 @@ public class GamePanel extends JPanel implements Runnable{
                                     materials.reset();
                                     player.reset();
                                     fade.reset();
+                                    countdown.reset();
+                                    score+=100;
                                     Player.gameState = GameState.FRYING;
                                 }
                             }
@@ -129,27 +135,6 @@ public class GamePanel extends JPanel implements Runnable{
                     (Player.gameState == GameState.IDLE && startButtonBounds.contains( e.getPoint() ))){
                         isMousePressedOnPlayButton = true;
 
-                    } else if (Player.gameState == GameState.FRYING) {
-                        if(SwingUtilities.isLeftMouseButton(e)){
-                            clickGame.currentClick = "L";
-                        }
-                        else if (SwingUtilities.isRightMouseButton(e)) clickGame.currentClick = "R";
-
-                        if(Objects.equals(clickGame.currentList.get(clickGame.currentClickIndex).click, clickGame.currentClick)){
-                            clickGame.currentList.set(clickGame.currentClickIndex,
-                                    (Objects.equals(clickGame.currentClick, "L") ? clickGame.lmbPressed : clickGame.rmbPressed));
-                            clickGame.currentClickIndex++;
-
-                            if(clickGame.currentClickIndex >= clickGame.currentList.size()){
-                                clickGame.currentClickIndex = 0;
-
-                                fade.reset();
-                                materials.reset();
-                                player.reset();
-                                Player.gameState = GameState.ASSEMBLE;
-                                System.out.println(Player.gameState);
-                            }
-                        }
                     }
                 }
 
@@ -182,20 +167,48 @@ public class GamePanel extends JPanel implements Runnable{
 
                     }
 
-                    if(Player.gameState == GameState.ASSEMBLE){
+                    if(Player.gameState == GameState.ASSEMBLE && fade.alphaValue <= 0){
 
                         if(timeGame.currentIndex < timeGame.ingredients.size()){
 
                             timeGame.finalX.add((int)(timeGame.x));
+                            timeGame.movedFinalX.add(timeGame.finalX.getLast()-175);
                             timeGame.ingredients.get(timeGame.currentIndex).bool = true;
                             timeGame.currentIndex++;
-//                            if(timeGame.currentIndex >= 9){
-//                                timeGame.currentIndex = 8;
-//                            }
+                            if(timeGame.currentIndex == timeGame.ingredients.size()){
+                                score *=2;
+                            }
 
 
                         }
                     }
+
+
+                    if (Player.gameState == GameState.FRYING && fade.alphaValue <= 0) {
+                        if(SwingUtilities.isLeftMouseButton(e)){
+                            clickGame.currentClick = "L";
+                        }
+                        else if (SwingUtilities.isRightMouseButton(e)) clickGame.currentClick = "R";
+
+                        if(Objects.equals(clickGame.currentList.get(clickGame.currentClickIndex).click, clickGame.currentClick)){
+                            clickGame.currentList.set(clickGame.currentClickIndex,
+                                    (Objects.equals(clickGame.currentClick, "L") ? clickGame.lmbPressed : clickGame.rmbPressed));
+                            clickGame.currentClickIndex++;
+
+                            if(clickGame.currentClickIndex >= clickGame.currentList.size()){
+                                clickGame.currentClickIndex = 0;
+
+                                fade.reset();
+                                materials.reset();
+                                player.reset();
+                                countdown.reset();
+                                score+=100;
+                                Player.gameState = GameState.ASSEMBLE;
+                                System.out.println(Player.gameState);
+                            }
+                        }
+                    }
+
 
                     isMousePressedOnPlayButton = false;
                 }
@@ -272,39 +285,53 @@ public class GamePanel extends JPanel implements Runnable{
     void stateUpdater(double dt){
         switch (Player.gameState) {
             case CHOPPING:
+                if(countdown.second >= 3){
+                    typeGame.timerBar.update(dt);
+                    if(!typeGame.areWordsShown){
+                        typeGame.currentWords = typeGame.getMap(5);
+                        typeGame.currentWordsList = new ArrayList<>(typeGame.currentWords.keySet());
+                        typeGame.areWordsShown = true;
+                    }
+                    if(typeGame.timerBar.progressVal == 0){
+                        //-1 hp
+                    }
 
-                typeGame.timerBar.update(dt);
-                if(!typeGame.areWordsShown){
-                    typeGame.currentWords = typeGame.getMap(5);
-                    typeGame.currentWordsList = new ArrayList<>(typeGame.currentWords.keySet());
-                    typeGame.areWordsShown = true;
+
+                    fade.transparent(0.024f);
                 }
-                if(typeGame.timerBar.progressVal == 0){
-                    Player.gameState = GameState.FRYING;
-                }
 
-
-                fade.transparent(0.024f);
 
 
                 break;
 
             case FRYING:
-                clickGame.timerBar.update(dt);
-                fade.transparent(0.05f);
-                if(!clickGame.comboGen) {
-                    clickGame.currentList = clickGame.getRandomCombo(5);
-                    clickGame.comboGen = true;
+
+                if(fade.alphaValue <= 0){
+                    clickGame.timerBar.update(dt);
                 }
-                if(clickGame.startX != clickGame.moveX && fade.alphaValue <=0){
-                    clickGame.pop(dt);
-                }
+                    fade.transparent(0.0099f);
+                    if(!clickGame.comboGen) {
+                        clickGame.currentList = clickGame.getRandomCombo(5);
+                        clickGame.comboGen = true;
+                    }
+                    if(clickGame.startX != clickGame.moveX && fade.alphaValue <=0){
+                        clickGame.pop(dt);
+                    }
+
+
 
                 break;
 
             case ASSEMBLE:
-                fade.transparent(0.05f);
-                if(timeGame.currentIndex<timeGame.ingredients.size()) timeGame.itemSwing(dt);
+                fade.transparent(0.0099f);
+                if(fade.alphaValue <= 0){
+
+                    if(timeGame.currentIndex<timeGame.ingredients.size()) timeGame.itemSwing(dt, fade.alphaValue);
+                    else{
+                        timeGame.movePlate(dt);
+                    }
+                }
+
 
                 break;
 
@@ -337,6 +364,9 @@ public class GamePanel extends JPanel implements Runnable{
 
                 break;
 
+            case SERVE:
+
+
 
 
         }
@@ -350,12 +380,26 @@ public class GamePanel extends JPanel implements Runnable{
 
         switch (Player.gameState) {
             case CHOPPING:
-                g.drawImage(background,-800,-100, Constants.SCREEN_WIDTH*Constants.SCALE,Constants.SCREEN_HEIGHT*Constants.SCALE, null);
+                Graphics2D gC = (Graphics2D) g;
+                g.drawImage(background, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT, null);
+                Color overlayC = new Color(0, 0,0, 190);
+                gC.setColor(overlayC);
+                gC.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
                 materials.drawChopping(g, deltaTime);
-                player.drawBack(g, deltaTime);
-                materials.drawChoppingVegetable(g);
-                typeGame.draw(g, materials.currentFrame);
-                fade.draw(g);
+                if(countdown.second < 3){
+                    gC.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+                    countdown.draw(g, deltaTime);
+                }
+                else{
+
+                    //player.drawBack(g, deltaTime);
+                    //materials.drawChoppingVegetable(g);
+                    typeGame.draw(g, materials.currentFrame);
+                    ui.drawScore(g);
+                    fade.draw(g);
+                }
+
+
                 break;
 
             case FRYING:
@@ -366,7 +410,7 @@ public class GamePanel extends JPanel implements Runnable{
                 gF.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
                 materials.drawFrying(g, deltaTime, fade.alphaValue);
                 clickGame.draw(g, clickGame.currentList, materials.currentFrame);
-
+                ui.drawScore(g);
                 fade.draw(g);
                 break;
 
@@ -377,6 +421,7 @@ public class GamePanel extends JPanel implements Runnable{
                 gA.setColor(overlayA);
                 gA.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
                 timeGame.draw(g);
+                ui.drawScore(g);
                 fade.draw(g);
                 break;
 
@@ -408,7 +453,7 @@ public class GamePanel extends JPanel implements Runnable{
                 gD.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
 
                 player.drawFrontTalk(g,deltaTime);
-                ui.draw(g);
+                ui.drawDiag(g);
 
 
                 fade.draw(g);
@@ -433,6 +478,11 @@ public class GamePanel extends JPanel implements Runnable{
 
                 }
                 break;
+
+            case SERVE:
+                gameOver.served(g);
+                break;
+
             default:
                 g.drawImage(background,0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT, null);
                 break;

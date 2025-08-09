@@ -20,7 +20,7 @@ public class Player {
 
 
     //public GameState gameState = GameState.CHOPPING;
-    public static GameState gameState =  GameState.CHOPPING;
+    public static GameState gameState =  GameState.ASSEMBLE;
 
     public Player(){
         {

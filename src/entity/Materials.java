@@ -11,7 +11,7 @@ public class Materials {
 
 
 
-    public SpriteSheet chopping;
+    public SpriteSheet chopping, choppingIdle;
     public SpriteSheet frying;
     public BufferedImage choppingTomato;
     public BufferedImage choppingOnion;
@@ -25,7 +25,8 @@ public class Materials {
     public Materials(GamePanel gp){
         this.gp = gp;
         try {
-            chopping = new SpriteSheet("/chopping/chopping.png", 64);
+            chopping = new SpriteSheet("/chopping/chopping2.png", 330);
+            choppingIdle = new SpriteSheet("/chopping/chopping.png", 64);
             frying = new SpriteSheet("/frying/frying.png", 330);
             frying.frameX = 100;
             frying.frameY = 100;
@@ -87,8 +88,8 @@ public class Materials {
         BufferedImage applianceFrame = chopping.getFrame(currentFrame);
         int applianceX = chopping.frameX*Constants.SCALE;
         int applianceY = chopping.frameY*Constants.SCALE;
-        int applianceWidth = applianceFrame.getWidth()*Constants.SCALE*2;
-        int applianceHeight = applianceFrame.getHeight()*Constants.SCALE*2;
+        int applianceWidth = applianceFrame.getWidth()*Constants.SCALE;
+        int applianceHeight = applianceFrame.getHeight()*Constants.SCALE;
         g.drawImage(applianceFrame, applianceX, applianceY, applianceWidth, applianceHeight, null);
     }
 
@@ -97,8 +98,8 @@ public class Materials {
 
         if(Constants.stationSwitch == 1){
             animationTimer += dt;
-            chopping.frameX = 314;
-            chopping.frameY = 101;
+            choppingIdle.frameX = 314;
+            choppingIdle.frameY = 101;
 
 
 
@@ -122,7 +123,7 @@ public class Materials {
 
                 animationTimer = 0;
                 currentFrame++;
-                if (currentFrame >= chopping.getFrameCount()) {
+                if (currentFrame >= choppingIdle.getFrameCount()) {
                     currentFrame = 0;
                 }
             }
@@ -139,9 +140,9 @@ public class Materials {
 
 
 
-            BufferedImage applianceFrame = chopping.getFrame(currentFrame);
-            int applianceX = chopping.frameX*Constants.SCALE;
-            int applianceY = chopping.frameY*Constants.SCALE;
+            BufferedImage applianceFrame = choppingIdle.getFrame(currentFrame);
+            int applianceX = choppingIdle.frameX*Constants.SCALE;
+            int applianceY = choppingIdle.frameY*Constants.SCALE;
             int applianceWidth = applianceFrame.getWidth()*Constants.SCALE;
             int applianceHeight = applianceFrame.getHeight()*Constants.SCALE;
             g.drawImage(applianceFrame, applianceX, applianceY, applianceWidth, applianceHeight, null);
