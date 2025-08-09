@@ -8,7 +8,6 @@ import main.SpriteSheet;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,13 +20,11 @@ public class TimeGame {
     double animationTimer = 0;
     double currentFrame = 0;
     public double x = -240;
-    public double y = 50;
     public double plateX = 190;
-    public List<Integer> finalX = new ArrayList<>();
-    public List<Integer> movedFinalX = new ArrayList<>();
+    public List<Pair> finalX = new ArrayList<>();
     double velocityX = 0;
-    double velocityY = 0;
-    double gravity = 8;
+    int allFinalX = 10;
+    boolean allFinalXReached = false;
     int center = 200;
     int backgroundX;
     public List<Pair> ingredients;
@@ -79,9 +76,14 @@ public class TimeGame {
     public static class Pair {
         BufferedImage bufferedImage;
         public boolean bool;
+        public int x;
 
         Pair(BufferedImage bufferedImage, boolean bool) {
             this.bufferedImage = bufferedImage;
+            this.bool = bool;
+        }
+        public Pair(int x, boolean bool) {
+            this.x = x;
             this.bool = bool;
         }
 
@@ -105,24 +107,37 @@ public class TimeGame {
         plateX = Math.max(10, plateX-200*dt);
 
         for(int i=0; i<finalX.size(); i++){
-            finalX.set(i,Math.max(movedFinalX.get(i), finalX.get(i)-(int) (200*dt)));
+            int x = finalX.get(i).x;
+            finalX.get(i).x = Math.max(allFinalX, x-(int) (200*dt));
+
+            if(finalX.get(i).x <= allFinalX) finalX.get(i).bool = true;
 
         }
         bell.frameX = (int) Math.max(600, bell.frameX-200*dt);
 
-        if(bell.frameX <= 600 && end){
-            animationTimer+=dt;
-            if (animationTimer >= Constants.FRAME_DURATION) {
+        for(int i = 0; i<finalX.size(); i++){
+            if(!finalX.get(i).bool) break;
+            else if (i>=finalX.size()-1 && finalX.get(i).bool) allFinalXReached = true;
+        }
 
-                animationTimer = 0;
-                currentFrame++;
-                if (currentFrame >= bell.getFrameCount()) {
-                    currentFrame = 0;
-                    end = false;
-                    Player.gameState = GameState.SERVE;
+        if(allFinalXReached){
+            if(bell.frameX <= 600 && end){
+                animationTimer+=dt;
+                if (animationTimer >= Constants.FRAME_DURATION) {
+
+                    animationTimer = 0;
+                    currentFrame++;
+                    if (currentFrame >= bell.getFrameCount()) {
+                        currentFrame = 0;
+                        end = false;
+
+                        reset();
+                        Player.gameState = GameState.SERVE;
+                    }
                 }
             }
         }
+
     }
 
     public void draw(Graphics g) {
@@ -145,13 +160,29 @@ public class TimeGame {
 
         for (int i = 0; i < currentIndex; i++) {
             if (ingredients.get(i).bool) {
-                g2.drawImage(ingredients.get(i).bufferedImage, finalX.get(i), 200 - (i == 8 ? (i * (-2)) : i),
+                g2.drawImage(ingredients.get(i).bufferedImage, finalX.get(i).x, 200 - (i == 8 ? (i * (-2)) : i),
                         ingredients.get(i).bufferedImage.getWidth() * Constants.SCALE,
                         ingredients.get(i).bufferedImage.getHeight() * Constants.SCALE, null);
             }
         }
 
 
+    }
+
+
+    public void reset(){
+        animationTimer = 0;
+        currentFrame = 0;
+        x = -240;
+        plateX = 190;
+        finalX.clear();
+        velocityX = 0;
+        allFinalXReached = false;
+        currentIndex = 0;
+        end = true;
+        for(Pair i:ingredients){
+            i.bool = false;
+        }
     }
 
 }

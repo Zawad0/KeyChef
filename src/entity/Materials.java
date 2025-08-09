@@ -86,7 +86,7 @@ public class Materials {
 
 
         BufferedImage applianceFrame = chopping.getFrame(currentFrame);
-        int applianceX = chopping.frameX*Constants.SCALE;
+        int applianceX = (Constants.SCREEN_WIDTH - applianceFrame.getWidth()*Constants.SCALE)/2;
         int applianceY = chopping.frameY*Constants.SCALE;
         int applianceWidth = applianceFrame.getWidth()*Constants.SCALE;
         int applianceHeight = applianceFrame.getHeight()*Constants.SCALE;
@@ -197,7 +197,7 @@ public class Materials {
         }
 
         BufferedImage applianceFrame = frying.getFrame(currentFrame);
-        int applianceX = frying.frameX*Constants.SCALE;
+        int applianceX = (Constants.SCREEN_WIDTH - applianceFrame.getWidth()*Constants.SCALE)/2;
         int applianceY = frying.frameY*Constants.SCALE;
         int applianceWidth = (int) (applianceFrame.getWidth()*Constants.SCALE);
         int applianceHeight = (int) (applianceFrame.getHeight()*Constants.SCALE);

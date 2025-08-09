@@ -184,6 +184,16 @@ public class TypeGame {
         return map;
     }
 
+    public void reset(){
+         areWordsShown = false;
+         if(currentWords != null)currentWords.clear();
+
+        if(currentWordsList != null)currentWordsList.clear();
+        currentWordIndex = 0;
+        currentCharIndex = 0;
+        timerBar.progressVal = 100;
+    }
+
 
 
 

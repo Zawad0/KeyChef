@@ -14,7 +14,8 @@ import java.util.List;
 public class ClickGame {
 
     BufferedImage board;
-    public BufferedImage lmb, rmb, lmb_press, rmb_press;
+    public BufferedImage lmb, rmb;
+    public BufferedImage lmb_press, rmb_press;
     Map<String, BufferedImage>map;
     public List<Pair>currentList;
     int space = 32;
@@ -57,10 +58,10 @@ public class ClickGame {
         }
     }
 
-    public class Pair{
+    public static class Pair{
         public String click;
         public BufferedImage image;
-        Pair(String click, BufferedImage image){
+        public Pair(String click, BufferedImage image){
             this.click = click;
             this.image = image;
         }
@@ -71,7 +72,7 @@ public class ClickGame {
         for(int i = 0; i<count;i++){
             String string = Math.random() < 0.5 ? "L" : "R";
 
-            randomArray.add(new Pair(string, (string == "L"? lmb : rmb)));
+            randomArray.add(new Pair(string, (string.equals("L") ? lmb : rmb)));
             totalWidth += lmb.getWidth()*Constants.SCALE + space;
         }
         return randomArray;
@@ -115,5 +116,19 @@ public class ClickGame {
 
 
     }
+
+    public void reset(){
+        if(currentList != null) currentList.clear();
+        currentList = null;
+        space = 32;
+        totalWidth = -space;
+        moveX = 0;
+        startX = Constants.SCREEN_WIDTH+5;
+        currentClickIndex = 0;
+        timerBar.progressVal = 100;
+        comboGen = false;
+
+    }
+
 
 }

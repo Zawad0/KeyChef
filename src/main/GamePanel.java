@@ -56,6 +56,7 @@ public class GamePanel extends JPanel implements Runnable{
     public static int burgerCount = 0;
     public static int score = 0;
     public static int highscore = 0;
+    public static int hearts = 3;
 
     TypeGame typeGame = new TypeGame();
 
@@ -107,16 +108,25 @@ public class GamePanel extends JPanel implements Runnable{
                                 typeGame.currentWordIndex++;
 
                                 if(typeGame.currentWordIndex>=typeGame.currentWordsList.size()){
-                                    materials.reset();
-                                    player.reset();
-                                    fade.reset();
-                                    countdown.reset();
+                                    reset();
                                     score+=100;
                                     Player.gameState = GameState.FRYING;
                                 }
                             }
                         }
+                        else{
+                            hearts--;
+                            ui.dmgHeart();
+                            if(hearts<=0) Player.gameState=GameState.GAMEOVER;
+                        }
 
+                    }
+
+                    else if(Player.gameState == GameState.GAMEOVER){
+                        if(e.getKeyChar() == KeyEvent.VK_SPACE){
+                            reset();
+                            Player.gameState = GameState.IDLE;
+                        }
                     }
 
 
@@ -153,8 +163,7 @@ public class GamePanel extends JPanel implements Runnable{
                             ui.typingOut = false;
                         }
                         if(ui.textIndex > 8){
-                            player.reset();
-                            materials.reset();
+                            reset();
                             Player.gameState = GameState.IDLE;
                         }
 
@@ -171,8 +180,14 @@ public class GamePanel extends JPanel implements Runnable{
 
                         if(timeGame.currentIndex < timeGame.ingredients.size()){
 
-                            timeGame.finalX.add((int)(timeGame.x));
-                            timeGame.movedFinalX.add(timeGame.finalX.getLast()-175);
+                            if(timeGame.x <=-30 || timeGame.x >= 420){
+                                hearts--;
+                                ui.dmgHeart();
+                                if(hearts<=0) Player.gameState=GameState.GAMEOVER;
+                            }
+                            System.out.println(hearts);
+                            timeGame.finalX.add(new TimeGame.Pair( ((int)(timeGame.x)), false));
+
                             timeGame.ingredients.get(timeGame.currentIndex).bool = true;
                             timeGame.currentIndex++;
                             if(timeGame.currentIndex == timeGame.ingredients.size()){
@@ -181,6 +196,7 @@ public class GamePanel extends JPanel implements Runnable{
 
 
                         }
+
                     }
 
 
@@ -191,21 +207,25 @@ public class GamePanel extends JPanel implements Runnable{
                         else if (SwingUtilities.isRightMouseButton(e)) clickGame.currentClick = "R";
 
                         if(Objects.equals(clickGame.currentList.get(clickGame.currentClickIndex).click, clickGame.currentClick)){
-                            clickGame.currentList.set(clickGame.currentClickIndex,
-                                    (Objects.equals(clickGame.currentClick, "L") ? clickGame.lmbPressed : clickGame.rmbPressed));
+
+                            ClickGame.Pair pressedPair = (Objects.equals(clickGame.currentClick, "L") ? clickGame.lmbPressed : clickGame.rmbPressed);
+                            clickGame.currentList.set(clickGame.currentClickIndex, new ClickGame.Pair(pressedPair.click, pressedPair.image));
+
                             clickGame.currentClickIndex++;
 
                             if(clickGame.currentClickIndex >= clickGame.currentList.size()){
                                 clickGame.currentClickIndex = 0;
 
-                                fade.reset();
-                                materials.reset();
-                                player.reset();
-                                countdown.reset();
+                                reset();
                                 score+=100;
                                 Player.gameState = GameState.ASSEMBLE;
                                 System.out.println(Player.gameState);
                             }
+                        }
+                        else{
+                            hearts--;
+                            ui.dmgHeart();
+                            if(hearts<=0) Player.gameState=GameState.GAMEOVER;
                         }
                     }
 
@@ -265,13 +285,11 @@ public class GamePanel extends JPanel implements Runnable{
 //        System.out.println(String.format("%.2f", 1/dt) + "fps"); //Shows FPS in logs
 
         stateUpdater(dt);
+        ui.heartManage();
         ui.type(dt);
         if(wasStartPressed){
-            fade.reset();
-            materials.reset();
-            player.reset();
+            reset();
             Player.gameState = GameState.CHOPPING;
-            wasStartPressed = false;
         }
 
         if(typeGame.timerBar.progressVal <= 0){
@@ -342,11 +360,9 @@ public class GamePanel extends JPanel implements Runnable{
                     delayTimer+=dt;
 
                     if(delayTimer >= 1.2){
-                        player.reset();
-                        materials.reset();
+                        reset();
                         Player.gameState = GameState.DIALOGUE;
-                        wasMousePressed = false;
-                        delayTimer = 0;
+
                     }
                 }
                 break;
@@ -365,6 +381,10 @@ public class GamePanel extends JPanel implements Runnable{
                 break;
 
             case SERVE:
+                if(score>highscore) highscore = score;
+                if(gameOver.duration <= 0 && !gameOver.showEnd){
+                    reset();
+                }
 
 
 
@@ -372,6 +392,68 @@ public class GamePanel extends JPanel implements Runnable{
         }
 
 
+    }
+
+    void reset(){
+
+        switch (Player.gameState){
+
+            case IDLE:
+                fade.reset();
+                materials.reset();
+                player.reset();
+                wasStartPressed = false;
+
+                break;
+
+            case MENU:
+                player.reset();
+                materials.reset();
+                wasMousePressed = false;
+                delayTimer = 0;
+
+                break;
+
+            case CHOPPING:
+                materials.reset();
+                player.reset();
+                fade.reset();
+                countdown.reset();
+                typeGame.reset();
+
+
+                break;
+
+            case FRYING:
+                fade.reset();
+                materials.reset();
+                player.reset();
+                countdown.reset();
+                clickGame.reset();
+
+                break;
+
+            case SERVE:
+                gameOver.reset();
+                Player.gameState = GameState.CHOPPING;
+                break;
+
+            case GAMEOVER:
+                fade.reset();
+                materials.reset();
+                player.reset();
+                wasStartPressed = false;
+                gameOver.reset();
+                countdown.reset();
+                clickGame.reset();
+                typeGame.reset();
+                timeGame.reset();
+                wasMousePressed = false;
+                delayTimer = 0;
+                hearts = 3;
+                score = 0;
+
+        }
     }
 
     public void paintComponent(Graphics g){
@@ -396,6 +478,7 @@ public class GamePanel extends JPanel implements Runnable{
                     //materials.drawChoppingVegetable(g);
                     typeGame.draw(g, materials.currentFrame);
                     ui.drawScore(g);
+                    ui.drawHearts(g, deltaTime);
                     fade.draw(g);
                 }
 
@@ -411,6 +494,7 @@ public class GamePanel extends JPanel implements Runnable{
                 materials.drawFrying(g, deltaTime, fade.alphaValue);
                 clickGame.draw(g, clickGame.currentList, materials.currentFrame);
                 ui.drawScore(g);
+                ui.drawHearts(g, deltaTime);
                 fade.draw(g);
                 break;
 
@@ -422,6 +506,7 @@ public class GamePanel extends JPanel implements Runnable{
                 gA.fillRect(0,0,Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
                 timeGame.draw(g);
                 ui.drawScore(g);
+                ui.drawHearts(g, deltaTime);
                 fade.draw(g);
                 break;
 
@@ -480,11 +565,24 @@ public class GamePanel extends JPanel implements Runnable{
                 break;
 
             case SERVE:
-                gameOver.served(g);
+
+                gameOver.served(g, deltaTime);
                 break;
 
-            default:
-                g.drawImage(background,0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT, null);
+            case GAMEOVER:
+                Graphics2D gG = (Graphics2D)g;
+                g.setColor(Color.BLACK);
+                g.fillRect(0,0, Constants.SCREEN_WIDTH,Constants.SCREEN_HEIGHT);
+                gG.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+
+                g.setFont(ui.pixelFont.deriveFont(Font.BOLD, 80f));
+                g.setColor(Color.WHITE);
+                g.drawString("GAME OVER", 300, 200);
+                g.setFont(ui.pixelFont.deriveFont(Font.BOLD, 40));
+                g.drawString("SCORE: "+score, 300, 450);
+                g.drawString("HIGHEST SCORE: "+highscore, 300, 500);
+                g.drawString(">PRESS SPACE TO CONTINUE<", 250, 600);
+                ui.drawHearts(g, deltaTime);
                 break;
         }
 

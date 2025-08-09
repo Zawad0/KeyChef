@@ -1,6 +1,7 @@
 package minigames;
 
 import main.Constants;
+import main.UI;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,19 +14,16 @@ public class Countdown extends JPanel {
     BufferedImage count3, count2, count1;
     public double second=0;
     int width, height, x, y;
+    UI ui = new UI();
 
     public Countdown(){
-        try {
-            count1 = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/count1.png")));
-            count2 = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/count2.png")));
-            count3 = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/count3.png")));
-            height = count1.getHeight()* Constants.SCALE;
-            width = count1.getWidth()* Constants.SCALE;
-            x = (Constants.SCREEN_WIDTH/2) - (width/2);
-            y = (Constants.SCREEN_HEIGHT/2) - (height/2);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        //            count1 = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/count1.png")));
+//            count2 = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/count2.png")));
+//            count3 = ImageIO.read(Objects.requireNonNull(getClass().getResource("/ui/count3.png")));
+//            height = count1.getHeight()* Constants.SCALE;
+//            width = count1.getWidth()* Constants.SCALE;
+        x = (Constants.SCREEN_WIDTH/2);
+        y = (Constants.SCREEN_HEIGHT/2);
     }
 
     public void draw(Graphics g, double dt){
@@ -33,17 +31,25 @@ public class Countdown extends JPanel {
 
         if(second >=4) return;
         else if(second>=2){
-            zoomin(g, count1, dt);
+            zoomin(g, "1", dt);
         } else if (second>=1) {
-            zoomin(g, count2, dt);
+            zoomin(g, "2", dt);
         } else {
-            zoomin(g, count3, dt);
+            zoomin(g, "3", dt);
         }
     }
 
-    void zoomin(Graphics g, BufferedImage bufferedImage, double dt){
+    void zoomin(Graphics g, String num, double dt){
+        Graphics2D g2 = (Graphics2D) g;
 
-        g.drawImage(bufferedImage, x,y,width, height, null);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+
+        g.setFont(ui.pixelFont.deriveFont(Font.BOLD, 120f));
+        g2.setColor(Color.BLACK);
+        g2.drawString(num, ((Constants.SCREEN_WIDTH-50)/2), ((Constants.SCREEN_HEIGHT-30)/2));
+        g.setFont(ui.pixelFont.deriveFont(Font.BOLD, 80f));
+        g2.setColor(Color.WHITE);
+        g2.drawString(num, ((Constants.SCREEN_WIDTH-50)/2), ((Constants.SCREEN_HEIGHT-30)/2));
     }
 
     public void reset(){
