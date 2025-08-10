@@ -572,6 +572,7 @@ public class GamePanel extends JPanel implements Runnable{
                 hearts = 3;
                 score = 0;
                 diffModif = 1;
+                burgerCount = 0;
 
                 typeGame.timerBar.durationSec = 10;
                 clickGame.timerBar.durationSec = 7;
