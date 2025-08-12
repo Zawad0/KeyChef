@@ -150,12 +150,20 @@ public class TypeGame {
             }
         }
 
-        public String getRandomWord() {
-            String s = words.get(ran.nextInt(words.size()));
+        public String getRandomWord(boolean largeWords) {
+            String s;
+            if (largeWords){
+                do {
+                    s = words.get(ran.nextInt(words.size()));
+                }while(s.length()<7);
+            }
+            else
+                s = words.get(ran.nextInt(words.size()));
+
             return s.toUpperCase();
         }
 
-        public List<String> getRandomArray(int size){
+        public List<String> getRandomArray(int size, boolean largeWords){
             List<String> randomArray;
             int arraySize;
             do {
@@ -164,7 +172,7 @@ public class TypeGame {
                 totalWidth = -space;
 
                 for(int i=0;i<size;i++){
-                    randomArray.add(getRandomWord());
+                    randomArray.add(getRandomWord(largeWords));
                 }
                 for(String word : randomArray){
                     arraySize += word.length();
@@ -179,9 +187,9 @@ public class TypeGame {
 
 
 
-    public Map<String, List<BufferedImage>> getMap (int size){
+    public Map<String, List<BufferedImage>> getMap (int size, boolean largeWords){
         Map<String, List<BufferedImage>> map = new HashMap<>();
-        List<String> list = words.getRandomArray(size);
+        List<String> list = words.getRandomArray(size, largeWords);
         for(int i=0;i<size;i++){
             map.put(list.get(i),keys.getSpriteList(list.get(i)));
         }

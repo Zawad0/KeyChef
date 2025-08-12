@@ -10,24 +10,26 @@ public class Sound {
     Clip fry;
     Clip lose;
     Clip select;
+    Clip heartDmg;
     public Clip bell;
     boolean isPlaying;
 
     public Sound() throws UnsupportedAudioFileException, IOException, LineUnavailableException {
-        menuTheme = laodClip("/sound/bgm/headscratcher.wav");
-        yapyapTheme = laodClip("/sound/bgm/shopkeepers_theme.wav");
-        idleTheme = laodClip("/sound/bgm/8bit Bossa.wav");
-        gameTheme = laodClip("/sound/bgm/cutie_pie.wav");
-        gameOverTheme = laodClip("/sound/bgm/gameoverjazz.wav");
+        menuTheme = loadClip("/sound/bgm/headscratcher.wav");
+        yapyapTheme = loadClip("/sound/bgm/shopkeepers_theme.wav");
+        idleTheme = loadClip("/sound/bgm/8bit Bossa.wav");
+        gameTheme = loadClip("/sound/bgm/alongtheway.wav");
+        gameOverTheme = loadClip("/sound/bgm/gameoverjazz.wav");
 
-        chop = laodClip("/sound/soundfx/chops.wav");
-        fry =laodClip("/sound/soundfx/gasburner.wav");
-        lose = laodClip("/sound/soundfx/losetrumpet.wav");
-        select = laodClip("/sound/soundfx/select.wav");
-        bell = laodClip("/sound/soundfx/Ding.wav");
+        chop = loadClip("/sound/soundfx/chops.wav");
+        fry = loadClip("/sound/soundfx/gasburner.wav");
+        lose = loadClip("/sound/soundfx/losetrumpet.wav");
+        select = loadClip("/sound/soundfx/select.wav");
+        bell = loadClip("/sound/soundfx/Ding.wav");
+        heartDmg = loadClip("/sound/soundfx/heartdown.wav");
     }
 
-    private Clip laodClip(String path) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+    private Clip loadClip(String path) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
         AudioInputStream ais = AudioSystem.getAudioInputStream(Objects.requireNonNull(getClass().getResource(path)));
 
         Clip clip = AudioSystem.getClip();
@@ -36,10 +38,12 @@ public class Sound {
         return clip;
     }
 
-    public void play(Clip clip, boolean loop){
+    public void play(Clip clip, boolean loop, float volume){
         if(clip.isRunning()){
             clip.stop();
         }
+        FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+        volumeControl.setValue(volume);
         clip.setFramePosition(0);
         if(loop){
             clip.loop(Clip.LOOP_CONTINUOUSLY);
@@ -48,7 +52,13 @@ public class Sound {
             clip.start();
         }
 
+
+
     }
+
+
+
+
 
     public void stop(Clip clip){
         if(clip.isRunning()){

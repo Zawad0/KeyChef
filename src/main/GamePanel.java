@@ -2,6 +2,7 @@ package main;
 
 import entity.Materials;
 import entity.Player;
+import entity.SaveGame;
 import minigames.ClickGame;
 import minigames.Countdown;
 import minigames.TimeGame;
@@ -17,7 +18,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -57,11 +60,17 @@ public class GamePanel extends JPanel implements Runnable{
     double delayTimer = 0;
     boolean wasMousePressed = false;
     boolean wasStartPressed = false;
+    int prevWrongPressed = -1;
+
     public static int burgerCount = 0;
     public static int score = 0;
     public static int highscore = 0;
     public static int hearts = 3;
+    static boolean scoreMulti = true;
     public int diffModif = 1;
+    public static float volume = 0.8f;
+    SaveGame saveGame = new SaveGame();
+    Reader reader;
 
     GameState previousGameState = null;
     Clip currentBackgroundMusic = null;
@@ -95,6 +104,7 @@ public class GamePanel extends JPanel implements Runnable{
             startButtonBounds = new Rectangle(357, 550, 154*2, 48*2);
             typeGame.timerBar.durationSec = 10;
             clickGame.timerBar.durationSec = 8;
+            highscore = saveGame.getHighscore();
             setFocusable(true);
             requestFocusInWindow();
 
@@ -107,6 +117,7 @@ public class GamePanel extends JPanel implements Runnable{
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if(Player.gameState == GameState.CHOPPING){
+                        int wrongPressed = typeGame.currentWordIndex;
                         char pressed = Character.toUpperCase(e.getKeyChar());
                         String currentWord = typeGame.currentWordsList.get(typeGame.currentWordIndex);
                         char currentChar = currentWord.charAt(typeGame.currentCharIndex);
@@ -124,14 +135,21 @@ public class GamePanel extends JPanel implements Runnable{
                                 if(typeGame.currentWordIndex>=typeGame.currentWordsList.size()){
                                     reset();
                                     clickGame.timerBar.progressVal = 100;
-                                    score+=100;
+                                    if(typeGame.timerBar.progressVal>=50){
+                                        score+=200;
+                                    } else score+=100;
                                     Player.gameState = GameState.FRYING;
                                 }
                             }
                         }
                         else{
-                            hearts--;
-                            ui.dmgHeart();
+                            if (prevWrongPressed != wrongPressed){
+                                hearts--;
+                                sound.play(sound.heartDmg, false,volume);
+                                ui.dmgHeart();
+                                prevWrongPressed=wrongPressed;
+                            }
+
                         }
 
                     }
@@ -158,7 +176,7 @@ public class GamePanel extends JPanel implements Runnable{
                     if( (Player.gameState == GameState.MENU && playButtonBounds.contains( e.getPoint() )) ||
                     (Player.gameState == GameState.IDLE && startButtonBounds.contains( e.getPoint() ))){
                         isMousePressedOnPlayButton = true;
-                        sound.play(sound.select, false);
+                        sound.play(sound.select, false, volume);
 
                     }
                 }
@@ -196,17 +214,29 @@ public class GamePanel extends JPanel implements Runnable{
 
                         if(timeGame.currentIndex < timeGame.ingredients.size()){
 
-                            if(timeGame.x <=-30 || timeGame.x >= 420){
+
+
+                            if(timeGame.x <=-30 || timeGame.x >= 400){
                                 hearts--;
+                                sound.play(sound.heartDmg,false,volume );
                                 ui.dmgHeart();
                             }
+                            if(timeGame.x <=140 || timeGame.x >= 250){
+                                scoreMulti = false;
+                            }
+
                             System.out.println(hearts);
                             timeGame.finalX.add(new TimeGame.Pair( ((int)(timeGame.x)), false));
 
                             timeGame.ingredients.get(timeGame.currentIndex).bool = true;
                             timeGame.currentIndex++;
                             if(timeGame.currentIndex == timeGame.ingredients.size()){
-                                score *=2;
+                                if(scoreMulti){
+                                    score *=3;
+                                }
+                                else
+                                    score = (int)(score * 1.5);
+
                             }
 
 
@@ -231,14 +261,17 @@ public class GamePanel extends JPanel implements Runnable{
                             if(clickGame.currentClickIndex >= clickGame.currentList.size()){
                                 clickGame.currentClickIndex = 0;
 
+                                if(clickGame.timerBar.progressVal >=50) score+=200;
+                                else score+=100;
+
                                 reset();
-                                score+=100;
                                 Player.gameState = GameState.ASSEMBLE;
                                 System.out.println(Player.gameState);
                             }
                         }
                         else{
                             hearts--;
+                            sound.play(sound.heartDmg,false,volume);
                             ui.dmgHeart();
                         }
                     }
@@ -300,6 +333,7 @@ public class GamePanel extends JPanel implements Runnable{
 
         stateUpdater(dt);
         updateBgm(Player.gameState);
+        if(score>highscore) highscore = score;
         ui.heartManage();
         if(hearts<=0) Player.gameState=GameState.GAMEOVER;
         ui.type(dt);
@@ -327,6 +361,7 @@ public class GamePanel extends JPanel implements Runnable{
                     }
                     if(typeGame.timerBar.progressVal == 0){
                         hearts--;
+                        sound.play(sound.heartDmg,false,volume);
                         ui.dmgHeart();
                         typeGame.timerBar.progressVal = 100;
                     }
@@ -353,6 +388,7 @@ public class GamePanel extends JPanel implements Runnable{
                 }
                 if(clickGame.timerBar.progressVal == 0){
                     hearts--;
+                    sound.play(sound.heartDmg,false,volume);
                     ui.dmgHeart();
                     clickGame.timerBar.progressVal = 100;
                 }
@@ -424,7 +460,6 @@ public class GamePanel extends JPanel implements Runnable{
                 break;
 
             case SERVE:
-                if(score>highscore) highscore = score;
                 if(gameOver.duration <= 0 && !gameOver.showEnd){
                     reset();
                     burgerCount++;
@@ -479,8 +514,8 @@ public class GamePanel extends JPanel implements Runnable{
                     sound.stop(currentBackgroundMusic);
                 }
                 currentBackgroundMusic = newMusic;
-                sound.play(currentBackgroundMusic, true);
-                if(currentState == GameState.GAMEOVER)sound.play(sound.lose,false);
+                sound.play(currentBackgroundMusic, true, volume);
+                if(currentState == GameState.GAMEOVER)sound.play(sound.lose,false, volume);
             }
 
             previousGameState = currentState;
@@ -491,11 +526,16 @@ public class GamePanel extends JPanel implements Runnable{
 
     void difficulty(){
         System.out.println(burgerCount+"   "+diffModif);
-        diffModif = Math.min(4, burgerCount/3);
+        diffModif = Math.min(5, burgerCount/2);
         switch (Player.gameState){
 
             case CHOPPING:
-                typeGame.currentWords = typeGame.getMap(2+diffModif);
+                if(diffModif <= 2){
+                    typeGame.currentWords = typeGame.getMap(2+diffModif, false);
+                }
+                else
+                    typeGame.currentWords = typeGame.getMap(2+diffModif, true);
+
                 typeGame.currentWordsList = new ArrayList<>(typeGame.currentWords.keySet());
                 typeGame.areWordsShown = true;
                 typeGame.timerBar.durationSec -= (0.5*diffModif);
@@ -534,6 +574,7 @@ public class GamePanel extends JPanel implements Runnable{
                 break;
 
             case CHOPPING:
+                prevWrongPressed = -1;
                 materials.reset();
                 player.reset();
                 fade.reset();
@@ -553,11 +594,13 @@ public class GamePanel extends JPanel implements Runnable{
                 break;
 
             case SERVE:
-
+                saveGame.savegame();
+                scoreMulti=true;
                 gameOver.reset();
                 break;
 
             case GAMEOVER:
+                saveGame.savegame();
                 fade.reset();
                 materials.reset();
                 player.reset();
@@ -631,6 +674,7 @@ public class GamePanel extends JPanel implements Runnable{
                 timeGame.draw(g);
                 ui.drawScore(g);
                 ui.drawHearts(g, deltaTime);
+
                 fade.draw(g);
                 break;
 

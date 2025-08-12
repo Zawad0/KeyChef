@@ -1,10 +1,7 @@
 package minigames;
 
 import entity.Player;
-import main.Constants;
-import main.GameState;
-import main.Sound;
-import main.SpriteSheet;
+import main.*;
 
 import javax.imageio.ImageIO;
 import javax.sound.sampled.LineUnavailableException;
@@ -99,6 +96,7 @@ public class TimeGame {
                 double accel = (center - x) * speed;
                 velocityX += accel * dt;
                 x += velocityX * dt;
+
             }
 
 
@@ -131,7 +129,7 @@ public class TimeGame {
 
                     animationTimer = 0;
                     currentFrame++;
-                    if(currentFrame == 1) sound.play(sound.bell,false);
+                    if(currentFrame == 1) sound.play(sound.bell,false, GamePanel.volume);
                     if (currentFrame >= bell.getFrameCount()) {
                         currentFrame = 0;
                         end = false;
@@ -171,6 +169,7 @@ public class TimeGame {
                         ingredients.get(i).bufferedImage.getHeight() * Constants.SCALE, null);
             }
         }
+//        g2.drawString(String.valueOf(x),200, 200); //debug
 
 
     }

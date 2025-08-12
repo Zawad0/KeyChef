@@ -71,9 +71,9 @@
                     BufferedImage heartsFrame = damagedHearts.getFrame(currentDmgFrame);
 
                     if(Player.gameState != GameState.GAMEOVER){
-                        int width = heartsFrame.getWidth();
-                        int height = heartsFrame.getHeight();
-                        g.drawImage(heartsFrame, x, y, width, height, null);
+                        int width = heartsFrame.getWidth()*4;
+                        int height = heartsFrame.getHeight()*4;
+                        g.drawImage(heartsFrame, (Constants.SCREEN_WIDTH-(32*4))/2, 250, width, height, null);
                     }
                     else{
                         int width = heartsFrame.getWidth()*Constants.SCALE;
@@ -196,9 +196,21 @@
             g.setColor(Color.WHITE);
 
             switch (Player.gameState){
-                case ASSEMBLE -> g.drawString("Score: "+(GamePanel.score), 150, 120);
-                case CHOPPING -> g.drawString("Score: "+(GamePanel.score), 210, 250);
-                case FRYING -> g.drawString("Score: "+(GamePanel.score), 20, 100);
+                case ASSEMBLE:
+                    g.drawString("Score: " + (GamePanel.score), 150, 120);
+                    g.setFont(pixelFont.deriveFont(Font.BOLD, 30f));
+                    if (GamePanel.scoreMulti) {
+                        g.drawString("3x", 150, 150);
+                    } else {
+                        g.drawString("1.5x", 150, 150);
+                    }
+                    break;
+                case CHOPPING:
+                    g.drawString("Score: "+(GamePanel.score), 210, 250);
+                    break;
+                case FRYING:
+                    g.drawString("Score: "+(GamePanel.score), 20, 100);
+                    break;
             }
 
         }
