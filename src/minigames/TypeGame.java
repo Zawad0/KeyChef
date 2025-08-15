@@ -14,13 +14,14 @@ public class TypeGame {
     public Map<String, List<BufferedImage>>currentWords = new HashMap<>();
     public WordBank words = new WordBank("text/words_alpha_common.txt");
     public Keys keys = new Keys();
-    public TimerBar timerBar = new TimerBar("/ui/progress_bar.png",5, Constants.SCALE);
+    public TimerBar timerBar = new TimerBar("/ui/progress_bar.png",10, Constants.SCALE);
 
     public List<String>currentWordsList;
     public int currentWordIndex = 0;
     public int currentCharIndex = 0;
-    static int space = 45;
+    static int space = 32;
     static int totalWidth;
+    static double letterSize = 2;
 
     BufferedImage barBack;
     BufferedImage barFrame;
@@ -49,8 +50,8 @@ public class TypeGame {
 
         for(List<BufferedImage> i : currentWords.values()){
             for(BufferedImage j : i){
-                g.drawImage(j, x,y, (int) (j.getWidth()*2.2), (int) (j.getHeight()*2.2),null);
-                x+=32;
+                g.drawImage(j, x,y, (int) (j.getWidth()*letterSize), (int) (j.getHeight()*letterSize),null);
+                x+= (int) (j.getWidth()*letterSize);
             }
             x+=space;
         }
@@ -152,10 +153,10 @@ public class TypeGame {
 
         public String getRandomWord(boolean largeWords) {
             String s;
-            if (largeWords){
+            if (!largeWords){
                 do {
                     s = words.get(ran.nextInt(words.size()));
-                }while(s.length()<7);
+                }while(s.length()>9);
             }
             else
                 s = words.get(ran.nextInt(words.size()));
@@ -166,20 +167,25 @@ public class TypeGame {
         public List<String> getRandomArray(int size, boolean largeWords){
             List<String> randomArray;
             int arraySize;
+
             do {
-                 randomArray = new ArrayList<>();
                 arraySize = 0;
                 totalWidth = -space;
+
+                randomArray = new ArrayList<>();
+
 
                 for(int i=0;i<size;i++){
                     randomArray.add(getRandomWord(largeWords));
                 }
                 for(String word : randomArray){
                     arraySize += word.length();
-                }
-            } while (arraySize>23);
+                    totalWidth+= (int) (16*letterSize*word.length()) + space;
+                    System.out.println(totalWidth);
 
-            totalWidth += (int) (arraySize*16*2.2);
+                }
+            } while (arraySize>26);
+
 
             return randomArray;
         }
@@ -192,6 +198,7 @@ public class TypeGame {
         List<String> list = words.getRandomArray(size, largeWords);
         for(int i=0;i<size;i++){
             map.put(list.get(i),keys.getSpriteList(list.get(i)));
+            System.out.println("getting map "+i);
         }
 
         return map;
@@ -200,7 +207,8 @@ public class TypeGame {
     public void reset(){
          areWordsShown = false;
          if(currentWords != null)currentWords.clear();
-
+        letterSize = 2;
+        space = 32;
         if(currentWordsList != null)currentWordsList.clear();
         currentWordIndex = 0;
         currentCharIndex = 0;

@@ -526,7 +526,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     void difficulty(){
         System.out.println(burgerCount+"   "+diffModif);
-        diffModif = Math.min(5, burgerCount/2);
+        diffModif = Math.min(3, burgerCount/2);
         switch (Player.gameState){
 
             case CHOPPING:
@@ -538,7 +538,7 @@ public class GamePanel extends JPanel implements Runnable{
 
                 typeGame.currentWordsList = new ArrayList<>(typeGame.currentWords.keySet());
                 typeGame.areWordsShown = true;
-                typeGame.timerBar.durationSec -= (0.5*diffModif);
+                typeGame.timerBar.durationSec -= (0.3*diffModif);
                 break;
 
             case FRYING:
@@ -580,6 +580,7 @@ public class GamePanel extends JPanel implements Runnable{
                 fade.reset();
                 countdown.reset();
                 typeGame.reset();
+                typeGame.timerBar.durationSec = 10;
 
 
                 break;
