@@ -24,6 +24,7 @@
         public Font pixelFont;
         public GraphicsEnvironment ge;
 
+
         SpriteSheet idleHearts, damagedHearts;
         BufferedImage emptyHeart;
         ArrayList<Hearts>heartsContainer;
@@ -197,7 +198,7 @@
 
             switch (Player.gameState){
                 case ASSEMBLE:
-                    g.drawString("Score: " + (GamePanel.score), 150, 120);
+                    g.drawString("Score: " + (GamePanel.score+GamePanel.currentScore), 150, 120);
                     g.setFont(pixelFont.deriveFont(Font.BOLD, 30f));
                     if (GamePanel.scoreMulti) {
                         g.drawString("3x", 150, 150);
@@ -206,10 +207,10 @@
                     }
                     break;
                 case CHOPPING:
-                    g.drawString("Score: "+(GamePanel.score), 210, 250);
+                    g.drawString("Score: "+(GamePanel.score+GamePanel.currentScore), 210, 250);
                     break;
                 case FRYING:
-                    g.drawString("Score: "+(GamePanel.score), 20, 100);
+                    g.drawString("Score: "+(GamePanel.score+GamePanel.currentScore), 20, 100);
                     break;
             }
 

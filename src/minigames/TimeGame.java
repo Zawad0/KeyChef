@@ -134,7 +134,8 @@ public class TimeGame {
                         currentFrame = 0;
                         end = false;
 
-
+                        GamePanel.score+=GamePanel.currentScore;
+                        GamePanel.currentScore = 0;
                         reset();
                         Player.gameState = GameState.SERVE;
                     }

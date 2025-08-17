@@ -64,10 +64,11 @@ public class GamePanel extends JPanel implements Runnable{
 
     public static int burgerCount = 0;
     public static int score = 0;
+    public static int currentScore = 0;
     public static int highscore = 0;
     public static int hearts = 3;
     static boolean scoreMulti = true;
-    public int diffModif = 1;
+    public double diffModif = 1;
     public static float volume = 0.8f;
     SaveGame saveGame = new SaveGame();
     Reader reader;
@@ -136,8 +137,8 @@ public class GamePanel extends JPanel implements Runnable{
                                     reset();
                                     clickGame.timerBar.progressVal = 100;
                                     if(typeGame.timerBar.progressVal>=50){
-                                        score+=200;
-                                    } else score+=100;
+                                        currentScore+= (int) (200*(1+diffModif/2));
+                                    } else currentScore+=(int) (100*(1+diffModif/2));
                                     Player.gameState = GameState.FRYING;
                                 }
                             }
@@ -232,10 +233,10 @@ public class GamePanel extends JPanel implements Runnable{
                             timeGame.currentIndex++;
                             if(timeGame.currentIndex == timeGame.ingredients.size()){
                                 if(scoreMulti){
-                                    score *=3;
+                                    currentScore *=3;
                                 }
                                 else
-                                    score = (int)(score * 1.5);
+                                    currentScore = (int)(currentScore * 1.5);
 
                             }
 
@@ -261,8 +262,8 @@ public class GamePanel extends JPanel implements Runnable{
                             if(clickGame.currentClickIndex >= clickGame.currentList.size()){
                                 clickGame.currentClickIndex = 0;
 
-                                if(clickGame.timerBar.progressVal >=50) score+=200;
-                                else score+=100;
+                                if(clickGame.timerBar.progressVal >=50) currentScore+=(int) (200*(1+diffModif/2));
+                                else currentScore+=(int) (100*(1+diffModif/2));
 
                                 reset();
                                 Player.gameState = GameState.ASSEMBLE;
@@ -531,10 +532,10 @@ public class GamePanel extends JPanel implements Runnable{
 
             case CHOPPING:
                 if(diffModif <= 2){
-                    typeGame.currentWords = typeGame.getMap(2+diffModif, false);
+                    typeGame.currentWords = typeGame.getMap((int) (2+diffModif), false);
                 }
                 else
-                    typeGame.currentWords = typeGame.getMap(2+diffModif, true);
+                    typeGame.currentWords = typeGame.getMap((int) (2+diffModif), true);
 
                 typeGame.currentWordsList = new ArrayList<>(typeGame.currentWords.keySet());
                 typeGame.areWordsShown = true;
@@ -542,7 +543,7 @@ public class GamePanel extends JPanel implements Runnable{
                 break;
 
             case FRYING:
-                clickGame.currentList = clickGame.getRandomCombo(3+diffModif);
+                clickGame.currentList = clickGame.getRandomCombo((int) (3+diffModif));
                 clickGame.comboGen = true;
                 clickGame.timerBar.durationSec -= (0.5*diffModif);
                 break;
